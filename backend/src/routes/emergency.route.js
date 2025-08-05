@@ -2,7 +2,6 @@ import express from "express";
 import {
   getEmergencyInfo,
   shareEmergencyInfo,
-  testEmailService
 } from "../controllers/emergency.controller.js";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
 

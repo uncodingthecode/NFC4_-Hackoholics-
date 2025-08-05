@@ -2,6 +2,7 @@ import  Prescription  from "../models/prescription.model.js";
 import  Medication  from "../models/medication.model.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
 import { processOCR } from "./ocr.controller.js";
+import { extractMedicationsFromPrescription } from "../utils/geminiService.js";
 import fs from 'fs';
 import { createWorker } from 'tesseract.js';
 import path from 'path';
