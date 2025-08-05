@@ -103,7 +103,7 @@ export default function ProfilePage({ params }: ProfilePageProps) {
     }))
   }
 
-  if (!profile) {
+  if (profile) {
     return (
       <div className="flex items-center justify-center h-96">
         <div className="text-center">
