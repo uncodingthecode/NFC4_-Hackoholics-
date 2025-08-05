@@ -78,8 +78,8 @@ export default function PrescriptionsPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Prescriptions</h1>
-          <p className="text-gray-600">Upload and manage your prescription documents with OCR processing</p>
+          <h1 className="text-3xl font-bold text-foreground">Prescriptions</h1>
+          <p className="text-muted-foreground">Upload and manage your prescription documents with OCR processing</p>
         </div>
         <Button onClick={() => setShowUploader(true)} className="bg-teal-600 hover:bg-teal-700">
           <Upload className="mr-2 h-4 w-4" />
@@ -158,10 +158,10 @@ export default function PrescriptionsPage() {
                   <div className="flex items-start justify-between">
                     <div>
                       <div className="flex items-center gap-2 mb-2">
-                        <h3 className="text-lg font-medium text-gray-900">Prescription #{prescription._id}</h3>
+                        <h3 className="text-lg font-medium text-foreground">Prescription #{prescription._id}</h3>
                         {getStatusBadge(prescription.status)}
                       </div>
-                      <p className="text-sm text-gray-600">
+                      <p className="text-sm text-muted-foreground">
                         Uploaded on {prescription.upload_time.toLocaleDateString()} at{" "}
                         {prescription.upload_time.toLocaleTimeString()}
                       </p>
@@ -174,8 +174,8 @@ export default function PrescriptionsPage() {
 
                   {/* OCR Text */}
                   <div>
-                    <h4 className="font-medium text-gray-900 mb-2">Extracted Text:</h4>
-                    <div className="p-3 bg-gray-50 rounded border text-sm text-gray-700 font-mono whitespace-pre-line">
+                    <h4 className="font-medium text-foreground mb-2">Extracted Text:</h4>
+                    <div className="p-3 bg-background rounded border text-sm text-gray-700 font-mono whitespace-pre-line">
                       {prescription.ocr_text}
                     </div>
                   </div>
@@ -183,13 +183,13 @@ export default function PrescriptionsPage() {
                   {/* Extracted Medications */}
                   {prescription.extracted_medications.length > 0 && (
                     <div>
-                      <h4 className="font-medium text-gray-900 mb-2">Extracted Medications:</h4>
+                      <h4 className="font-medium text-foreground mb-2">Extracted Medications:</h4>
                       <div className="space-y-2">
                         {prescription.extracted_medications.map((med, index) => (
-                          <div key={index} className="flex items-center justify-between p-3 bg-white border rounded-lg">
+                          <div key={index} className="flex items-center justify-between p-3 bg-card border rounded-lg">
                             <div>
                               <p className="font-medium">{med.name}</p>
-                              <p className="text-sm text-gray-600">
+                              <p className="text-sm text-muted-foreground">
                                 {med.dosage} - {med.frequency}
                               </p>
                             </div>
@@ -223,11 +223,13 @@ export default function PrescriptionsPage() {
 
       {/* No Prescriptions */}
       {filteredPrescriptions.length === 0 && (
-        <Card>
+        <Card className="shadow-[0_0_15px_rgba(255,255,255,0.1)] hover:shadow-[0_0_25px_rgba(255,255,255,0.2)] transition-shadow">
+
+
           <CardContent className="text-center py-12">
             <FileText className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">No prescriptions found</h3>
-            <p className="text-gray-600 mb-4">
+            <h3 className="text-lg font-medium text-foreground mb-2">No prescriptions found</h3>
+            <p className="text-muted-foreground mb-4">
               {searchTerm ? "Try adjusting your search terms" : "Upload your first prescription for OCR processing"}
             </p>
             <Button onClick={() => setShowUploader(true)} className="bg-teal-600 hover:bg-teal-700">

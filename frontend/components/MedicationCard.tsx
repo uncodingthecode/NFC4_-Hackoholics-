@@ -34,16 +34,16 @@ export function MedicationCard({ medication, onSetReminder, onViewSchedule }: Me
           <span>{medication.medicine_name}</span>
           {isLowStock && <AlertTriangle className="h-4 w-4 text-orange-500" />}
         </CardTitle>
-        <p className="text-sm text-gray-600">{medication.dosage}</p>
+        <p className="text-sm text-muted-foreground">{medication.dosage}</p>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="space-y-2">
           <div className="flex justify-between items-center">
-            <span className="text-sm text-gray-600">Frequency</span>
+            <span className="text-sm text-muted-foreground">Frequency</span>
             <Badge variant="outline">{medication.frequency}</Badge>
           </div>
           <div className="flex justify-between items-center">
-            <span className="text-sm text-gray-600">Timing</span>
+            <span className="text-sm text-muted-foreground">Timing</span>
             <div className="flex gap-1">
               {medication.timing.map((time, index) => (
                 <Badge key={index} variant="secondary" className="text-xs">
@@ -53,12 +53,12 @@ export function MedicationCard({ medication, onSetReminder, onViewSchedule }: Me
             </div>
           </div>
           <div className="flex justify-between items-center">
-            <span className="text-sm text-gray-600">Stock</span>
+            <span className="text-sm text-muted-foreground">Stock</span>
             <Badge variant={isLowStock ? "destructive" : "secondary"}>{medication.stock_count} pills</Badge>
           </div>
           {isExpiringSoon && (
             <div className="flex justify-between items-center">
-              <span className="text-sm text-gray-600">Expires</span>
+              <span className="text-sm text-muted-foreground">Expires</span>
               <Badge variant="destructive">{medication.end_date.toLocaleDateString()}</Badge>
             </div>
           )}

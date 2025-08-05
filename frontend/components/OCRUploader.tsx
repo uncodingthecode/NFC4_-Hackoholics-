@@ -128,22 +128,24 @@ License: MD123456`,
               onDragOver={(e) => e.preventDefault()}
             >
               <Upload className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 mb-2">Upload Prescription Image</h3>
-              <p className="text-gray-600 mb-4">Drag and drop your prescription image here, or click to browse</p>
+              <h3 className="text-lg font-medium text-foreground mb-2">Upload Prescription Image</h3>
+              <p className="text-muted-foreground mb-4">Drag and drop your prescription image here, or click to browse</p>
               <input type="file" accept="image/*" onChange={handleFileChange} className="hidden" id="file-upload" />
               <label htmlFor="file-upload">
                 <Button asChild className="bg-teal-600 hover:bg-teal-700">
                   <span>Choose File</span>
                 </Button>
               </label>
-              <p className="text-sm text-gray-500 mt-2">Supports: JPG, PNG, GIF (max 10MB)</p>
+              <p className="text-sm text-muted-foreground mt-2">Supports: JPG, PNG, GIF (max 10MB)</p>
             </div>
           )}
 
           {selectedFile && !ocrResult && (
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Image Preview */}
-              <Card>
+              <Card className="shadow-[0_0_15px_rgba(255,255,255,0.1)] hover:shadow-[0_0_25px_rgba(255,255,255,0.2)] transition-shadow">
+
+
                 <CardHeader>
                   <CardTitle className="text-lg">Image Preview</CardTitle>
                 </CardHeader>
@@ -153,10 +155,10 @@ License: MD123456`,
                       <img
                         src={previewUrl! || "/placeholder.svg"}
                         alt="Prescription preview"
-                        className="w-full h-64 object-contain border rounded-lg bg-gray-50"
+                        className="w-full h-64 object-contain border rounded-lg bg-background"
                       />
                     </div>
-                    <div className="flex items-center justify-between text-sm text-gray-600">
+                    <div className="flex items-center justify-between text-sm text-muted-foreground">
                       <span>File: {selectedFile.name}</span>
                       <span>Size: {(selectedFile.size / 1024 / 1024).toFixed(2)} MB</span>
                     </div>
@@ -165,13 +167,15 @@ License: MD123456`,
               </Card>
 
               {/* Processing Controls */}
-              <Card>
+              <Card className="shadow-[0_0_15px_rgba(255,255,255,0.1)] hover:shadow-[0_0_25px_rgba(255,255,255,0.2)] transition-shadow">
+
+
                 <CardHeader>
                   <CardTitle className="text-lg">OCR Processing</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    <div className="text-sm text-gray-600">
+                    <div className="text-sm text-muted-foreground">
                       <p className="mb-2">Our AI will extract:</p>
                       <ul className="list-disc list-inside space-y-1">
                         <li>Medication names and dosages</li>
@@ -184,8 +188,8 @@ License: MD123456`,
                     {isProcessing ? (
                       <div className="text-center py-6">
                         <Loader2 className="h-8 w-8 animate-spin mx-auto text-teal-600 mb-3" />
-                        <p className="text-sm text-gray-600">Processing prescription image...</p>
-                        <p className="text-xs text-gray-500 mt-1">This may take up to 30 seconds</p>
+                        <p className="text-sm text-muted-foreground">Processing prescription image...</p>
+                        <p className="text-xs text-muted-foreground mt-1">This may take up to 30 seconds</p>
                       </div>
                     ) : (
                       <div className="flex gap-2">
@@ -222,7 +226,9 @@ License: MD123456`,
 
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {/* Extracted Text */}
-                <Card>
+                <Card className="shadow-[0_0_15px_rgba(255,255,255,0.1)] hover:shadow-[0_0_25px_rgba(255,255,255,0.2)] transition-shadow">
+
+
                   <CardHeader>
                     <CardTitle className="text-lg flex items-center gap-2">
                       <FileText className="h-4 w-4" />
@@ -230,14 +236,16 @@ License: MD123456`,
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <div className="p-3 bg-gray-50 rounded border text-sm font-mono whitespace-pre-line max-h-64 overflow-y-auto">
+                    <div className="p-3 bg-background rounded border text-sm font-mono whitespace-pre-line max-h-64 overflow-y-auto">
                       {ocrResult.ocr_text}
                     </div>
                   </CardContent>
                 </Card>
 
                 {/* Identified Medications */}
-                <Card>
+                <Card className="shadow-[0_0_15px_rgba(255,255,255,0.1)] hover:shadow-[0_0_25px_rgba(255,255,255,0.2)] transition-shadow">
+
+
                   <CardHeader>
                     <CardTitle className="text-lg flex items-center gap-2">
                       <Check className="h-4 w-4" />

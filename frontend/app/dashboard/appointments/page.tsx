@@ -40,8 +40,8 @@ export default function AppointmentsPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Appointments</h1>
-          <p className="text-gray-600">Schedule and manage your medical appointments</p>
+          <h1 className="text-3xl font-bold text-foreground">Appointments</h1>
+          <p className="text-muted-foreground">Schedule and manage your medical appointments</p>
         </div>
         <Button onClick={() => setShowAddModal(true)} className="bg-teal-600 hover:bg-teal-700">
           <Plus className="mr-2 h-4 w-4" />
@@ -81,7 +81,9 @@ export default function AppointmentsPage() {
 
       {/* Calendar View */}
       {viewMode === "calendar" && (
-        <Card>
+        <Card className="shadow-[0_0_15px_rgba(255,255,255,0.1)] hover:shadow-[0_0_25px_rgba(255,255,255,0.2)] transition-shadow">
+
+
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Calendar className="h-5 w-5 text-teal-600" />
@@ -100,7 +102,9 @@ export default function AppointmentsPage() {
         <div className="space-y-6">
           {/* Upcoming Appointments */}
           {upcomingAppointments.length > 0 && (
-            <Card>
+            <Card className="shadow-[0_0_15px_rgba(255,255,255,0.1)] hover:shadow-[0_0_25px_rgba(255,255,255,0.2)] transition-shadow">
+
+
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Clock className="h-5 w-5 text-blue-600" />
@@ -115,26 +119,26 @@ export default function AppointmentsPage() {
                     return (
                       <div
                         key={appointment._id}
-                        className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 transition-colors"
+                        className="flex items-center justify-between p-4 border rounded-lg hover:bg-background transition-colors"
                       >
                         <div className="flex items-center gap-4">
                           <div className="p-2 bg-blue-100 rounded-lg">
                             <User className="h-5 w-5 text-blue-600" />
                           </div>
                           <div>
-                            <h3 className="font-medium text-gray-900">{appointment.doctor_name}</h3>
-                            <p className="text-sm text-gray-600">{appointment.type}</p>
+                            <h3 className="font-medium text-foreground">{appointment.doctor_name}</h3>
+                            <p className="text-sm text-muted-foreground">{appointment.type}</p>
                             <div className="flex items-center gap-4 mt-1">
-                              <div className="flex items-center gap-1 text-sm text-gray-500">
+                              <div className="flex items-center gap-1 text-sm text-muted-foreground">
                                 <Calendar className="h-3 w-3" />
                                 {appointment.date.toLocaleDateString()}
                               </div>
-                              <div className="flex items-center gap-1 text-sm text-gray-500">
+                              <div className="flex items-center gap-1 text-sm text-muted-foreground">
                                 <Clock className="h-3 w-3" />
                                 {appointment.date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
                               </div>
                             </div>
-                            {appointment.notes && <p className="text-sm text-gray-600 mt-1">{appointment.notes}</p>}
+                            {appointment.notes && <p className="text-sm text-muted-foreground mt-1">{appointment.notes}</p>}
                           </div>
                         </div>
                         <div className="flex items-center gap-2">
@@ -155,10 +159,12 @@ export default function AppointmentsPage() {
 
           {/* Past Appointments */}
           {pastAppointments.length > 0 && (
-            <Card>
+            <Card className="shadow-[0_0_15px_rgba(255,255,255,0.1)] hover:shadow-[0_0_25px_rgba(255,255,255,0.2)] transition-shadow">
+
+
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Calendar className="h-5 w-5 text-gray-600" />
+                  <Calendar className="h-5 w-5 text-muted-foreground" />
                   Past Appointments
                 </CardTitle>
                 <CardDescription>Your completed medical appointments</CardDescription>
@@ -172,11 +178,11 @@ export default function AppointmentsPage() {
                     >
                       <div className="flex items-center gap-4">
                         <div className="p-2 bg-gray-100 rounded-lg">
-                          <User className="h-5 w-5 text-gray-600" />
+                          <User className="h-5 w-5 text-muted-foreground" />
                         </div>
                         <div>
                           <h3 className="font-medium text-gray-700">{appointment.doctor_name}</h3>
-                          <p className="text-sm text-gray-500">{appointment.type}</p>
+                          <p className="text-sm text-muted-foreground">{appointment.type}</p>
                           <div className="flex items-center gap-4 mt-1">
                             <div className="flex items-center gap-1 text-sm text-gray-400">
                               <Calendar className="h-3 w-3" />
@@ -193,7 +199,7 @@ export default function AppointmentsPage() {
                     </div>
                   ))}
                   {pastAppointments.length > 5 && (
-                    <p className="text-sm text-gray-500 text-center">
+                    <p className="text-sm text-muted-foreground text-center">
                       +{pastAppointments.length - 5} more past appointments
                     </p>
                   )}
@@ -206,11 +212,13 @@ export default function AppointmentsPage() {
 
       {/* No Appointments */}
       {filteredAppointments.length === 0 && (
-        <Card>
+        <Card className="shadow-[0_0_15px_rgba(255,255,255,0.1)] hover:shadow-[0_0_25px_rgba(255,255,255,0.2)] transition-shadow">
+
+
           <CardContent className="text-center py-12">
             <Calendar className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">No appointments found</h3>
-            <p className="text-gray-600 mb-4">
+            <h3 className="text-lg font-medium text-foreground mb-2">No appointments found</h3>
+            <p className="text-muted-foreground mb-4">
               {searchTerm ? "Try adjusting your search terms" : "Schedule your first medical appointment"}
             </p>
             <Button onClick={() => setShowAddModal(true)} className="bg-teal-600 hover:bg-teal-700">

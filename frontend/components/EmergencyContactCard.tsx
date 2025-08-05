@@ -29,7 +29,7 @@ export function EmergencyContactCard({ contact, onEdit, onDelete }: EmergencyCon
       <CardContent className="p-4">
         <div className="flex items-start justify-between mb-3">
           <div>
-            <h3 className="font-medium text-gray-900">{contact.name}</h3>
+            <h3 className="font-medium text-foreground">{contact.name}</h3>
             <Badge variant="outline" className="text-xs mt-1">
               {contact.relation}
             </Badge>
@@ -49,7 +49,7 @@ export function EmergencyContactCard({ contact, onEdit, onDelete }: EmergencyCon
         </div>
 
         <div className="space-y-2">
-          <div className="flex items-center gap-2 text-sm text-gray-600">
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <Phone className="h-3 w-3" />
             <span>{contact.phone}</span>
           </div>

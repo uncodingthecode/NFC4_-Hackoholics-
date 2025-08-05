@@ -28,8 +28,8 @@ export default function EmergencyPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Emergency Contacts</h1>
-          <p className="text-gray-600">Manage emergency contacts and quick access to important information</p>
+          <h1 className="text-3xl font-bold text-foreground">Emergency Contacts</h1>
+          <p className="text-muted-foreground">Manage emergency contacts and quick access to important information</p>
         </div>
         <Button onClick={() => setShowAddModal(true)} className="bg-red-600 hover:bg-red-700">
           <Plus className="mr-2 h-4 w-4" />
@@ -123,7 +123,9 @@ export default function EmergencyPage() {
       </div>
 
       {/* Emergency Contacts */}
-      <Card>
+      <Card className="shadow-[0_0_15px_rgba(255,255,255,0.1)] hover:shadow-[0_0_25px_rgba(255,255,255,0.2)] transition-shadow">
+
+
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Phone className="h-5 w-5 text-teal-600" />
@@ -141,8 +143,8 @@ export default function EmergencyPage() {
           ) : (
             <div className="text-center py-8">
               <User className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 mb-2">No emergency contacts</h3>
-              <p className="text-gray-600 mb-4">Add emergency contacts to ensure help is available when needed</p>
+              <h3 className="text-lg font-medium text-foreground mb-2">No emergency contacts</h3>
+              <p className="text-muted-foreground mb-4">Add emergency contacts to ensure help is available when needed</p>
               <Button onClick={() => setShowAddModal(true)} className="bg-red-600 hover:bg-red-700">
                 <Plus className="mr-2 h-4 w-4" />
                 Add First Contact
@@ -153,7 +155,9 @@ export default function EmergencyPage() {
       </Card>
 
       {/* Medical Information Summary */}
-      <Card>
+      <Card className="shadow-[0_0_15px_rgba(255,255,255,0.1)] hover:shadow-[0_0_25px_rgba(255,255,255,0.2)] transition-shadow">
+
+
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Shield className="h-5 w-5 text-blue-600" />
@@ -164,7 +168,7 @@ export default function EmergencyPage() {
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <h4 className="font-medium text-gray-900 mb-2">Personal Information</h4>
+              <h4 className="font-medium text-foreground mb-2">Personal Information</h4>
               <div className="space-y-2 text-sm">
                 <p>
                   <span className="font-medium">Name:</span> {user?.name}
@@ -179,7 +183,7 @@ export default function EmergencyPage() {
             </div>
 
             <div>
-              <h4 className="font-medium text-gray-900 mb-2">Critical Medical Info</h4>
+              <h4 className="font-medium text-foreground mb-2">Critical Medical Info</h4>
               <div className="space-y-2 text-sm">
                 <p>
                   <span className="font-medium">Blood Type:</span> O+ (example)

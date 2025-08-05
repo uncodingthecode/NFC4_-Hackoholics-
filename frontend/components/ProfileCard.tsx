@@ -30,49 +30,49 @@ export function ProfileCard({ userId }: ProfileCardProps) {
 
           <div className="flex-1 space-y-4">
             <div>
-              <h2 className="text-2xl font-bold text-gray-900">Health Profile</h2>
-              <p className="text-gray-600">Personal health information overview</p>
+              <h2 className="text-2xl font-bold text-foreground">Health Profile</h2>
+              <p className="text-muted-foreground">Personal health information overview</p>
             </div>
 
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <div className="flex items-center gap-2">
-                <Calendar className="h-4 w-4 text-gray-500" />
+                <Calendar className="h-4 w-4 text-muted-foreground" />
                 <div>
-                  <p className="text-sm text-gray-500">Age</p>
+                  <p className="text-sm text-muted-foreground">Age</p>
                   <p className="font-medium">{age} years</p>
                 </div>
               </div>
 
               <div className="flex items-center gap-2">
-                <Ruler className="h-4 w-4 text-gray-500" />
+                <Ruler className="h-4 w-4 text-muted-foreground" />
                 <div>
-                  <p className="text-sm text-gray-500">Height</p>
+                  <p className="text-sm text-muted-foreground">Height</p>
                   <p className="font-medium">{profile.height} cm</p>
                 </div>
               </div>
 
               <div className="flex items-center gap-2">
-                <Weight className="h-4 w-4 text-gray-500" />
+                <Weight className="h-4 w-4 text-muted-foreground" />
                 <div>
-                  <p className="text-sm text-gray-500">Weight</p>
+                  <p className="text-sm text-muted-foreground">Weight</p>
                   <p className="font-medium">{profile.weight} kg</p>
                 </div>
               </div>
 
               <div className="flex items-center gap-2">
-                <Droplets className="h-4 w-4 text-gray-500" />
+                <Droplets className="h-4 w-4 text-muted-foreground" />
                 <div>
-                  <p className="text-sm text-gray-500">Blood Group</p>
+                  <p className="text-sm text-muted-foreground">Blood Group</p>
                   <p className="font-medium">{profile.blood_group || "N/A"}</p>
                 </div>
               </div>
             </div>
 
             <div className="flex flex-wrap items-center gap-2">
-              <Badge variant="outline" className="bg-white">
+              <Badge variant="outline" className="bg-card">
                 BMI: {bmi.toFixed(1)}
               </Badge>
-              <Badge variant="outline" className="bg-white">
+              <Badge variant="outline" className="bg-card">
                 {profile.gender}
               </Badge>
               {profile.allergies.length > 0 && (

@@ -26,8 +26,8 @@ export default function MedicationsPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Medications</h1>
-          <p className="text-gray-600">Manage your family's medications and schedules</p>
+          <h1 className="text-3xl font-bold text-foreground">Medications</h1>
+          <p className="text-muted-foreground">Manage your family's medications and schedules</p>
         </div>
         <Button onClick={() => setShowAddModal(true)} className="bg-teal-600 hover:bg-teal-700">
           <Plus className="mr-2 h-4 w-4" />
@@ -63,7 +63,7 @@ export default function MedicationsPage() {
           <CardContent>
             <div className="space-y-2">
               {lowStockMeds.map((med) => (
-                <div key={med._id} className="flex justify-between items-center p-2 bg-white rounded border">
+                <div key={med._id} className="flex justify-between items-center p-2 bg-card rounded border">
                   <span className="font-medium">{med.medicine_name}</span>
                   <Badge variant="destructive">{med.stock_count} left</Badge>
                 </div>
@@ -84,11 +84,11 @@ export default function MedicationsPage() {
             <CardContent className="space-y-4">
               <div className="space-y-2">
                 <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-600">Frequency</span>
+                  <span className="text-sm text-muted-foreground">Frequency</span>
                   <Badge variant="outline">{medication.frequency}</Badge>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-600">Timing</span>
+                  <span className="text-sm text-muted-foreground">Timing</span>
                   <div className="flex gap-1">
                     {medication.timing.map((time, index) => (
                       <Badge key={index} variant="secondary" className="text-xs">
@@ -98,7 +98,7 @@ export default function MedicationsPage() {
                   </div>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-600">Stock</span>
+                  <span className="text-sm text-muted-foreground">Stock</span>
                   <Badge
                     variant={medication.stock_count <= medication.refill_alert_threshold ? "destructive" : "secondary"}
                   >
@@ -106,7 +106,7 @@ export default function MedicationsPage() {
                   </Badge>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-600">Duration</span>
+                  <span className="text-sm text-muted-foreground">Duration</span>
                   <span className="text-sm">
                     {medication.start_date.toLocaleDateString()} - {medication.end_date.toLocaleDateString()}
                   </span>
@@ -129,11 +129,13 @@ export default function MedicationsPage() {
       </div>
 
       {filteredMedications.length === 0 && (
-        <Card>
+        <Card className="shadow-[0_0_15px_rgba(255,255,255,0.1)] hover:shadow-[0_0_25px_rgba(255,255,255,0.2)] transition-shadow">
+
+
           <CardContent className="text-center py-12">
             <Pill className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">No medications found</h3>
-            <p className="text-gray-600 mb-4">
+            <h3 className="text-lg font-medium text-foreground mb-2">No medications found</h3>
+            <p className="text-muted-foreground mb-4">
               {searchTerm ? "Try adjusting your search terms" : "Start by adding your first medication"}
             </p>
             <Button onClick={() => setShowAddModal(true)} className="bg-teal-600 hover:bg-teal-700">

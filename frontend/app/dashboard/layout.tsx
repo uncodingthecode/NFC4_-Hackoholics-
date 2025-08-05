@@ -33,7 +33,7 @@ export default function DashboardLayout({
       <AppSidebar />
       <SidebarInset>
         <TopNavbar />
-        <main className="flex-1 p-6 bg-gray-50">{children}</main>
+        <main className="flex-1 p-6 bg-background">{children}</main>
       </SidebarInset>
     </SidebarProvider>
   )

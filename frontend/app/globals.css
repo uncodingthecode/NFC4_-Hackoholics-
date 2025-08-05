@@ -154,3 +154,18 @@
 .chat-scroll::-webkit-scrollbar-thumb:hover {
   background: #94a3b8;
 }
+
+.card {
+  transition: box-shadow 0.3s ease-in-out;
+}
+
+
+@layer base {
+  body {
+    @apply bg-background text-foreground transition-colors duration-300;
+  }
+
+  * {
+    @apply border-border;
+  }
+}

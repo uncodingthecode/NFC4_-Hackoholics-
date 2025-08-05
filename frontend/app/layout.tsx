@@ -1,31 +1,39 @@
-import type React from "react"
-import type { Metadata } from "next"
-import { Inter } from "next/font/google"
-import "./globals.css"
-import { HealthcareProvider } from "@/context/healthcare-context"
-import { Toaster } from "@/components/ui/toaster"
+import type { Metadata } from "next";
+import { Inter } from "next/font/google";
+import "./globals.css";
 
-const inter = Inter({ subsets: ["latin"] })
+import { HealthcareProvider } from "@/context/healthcare-context";
+import { Toaster } from "@/components/ui/toaster";
+import { ThemeProvider } from "next-themes";  // NEW
+
+const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "HealthCare Family Dashboard",
   description: "Manage your family's health records and medications",
-    generator: 'v0.dev'
-}
+  generator: "v0.dev",
+};
 
 export default function RootLayout({
   children,
 }: {
-  children: React.ReactNode
+  children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>
-        <HealthcareProvider>
-          {children}
-          <Toaster />
-        </HealthcareProvider>
+        <ThemeProvider
+          attribute="class"           // Enables 'dark' class on <html>
+          defaultTheme="system"       // Follow system preference
+          enableSystem={true}
+          disableTransitionOnChange   // Prevents flicker
+        >
+          <HealthcareProvider>
+            {children}
+            <Toaster />
+          </HealthcareProvider>
+        </ThemeProvider>
       </body>
     </html>
-  )
+  );
 }

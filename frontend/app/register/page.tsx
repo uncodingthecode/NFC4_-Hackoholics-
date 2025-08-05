@@ -110,8 +110,8 @@ export default function RegisterPage() {
               <UserPlus className="h-10 w-10 text-white" />
             </div>
           </div>
-          <h1 className="text-3xl font-bold text-gray-900">Join HealthCare</h1>
-          <p className="text-gray-600">Create your family health management account</p>
+          <h1 className="text-3xl font-bold text-foreground">Join HealthCare</h1>
+          <p className="text-muted-foreground">Create your family health management account</p>
         </div>
 
         {/* Registration Form */}
@@ -234,7 +234,7 @@ export default function RegisterPage() {
                   required
                   className="rounded border-gray-300 text-green-600 focus:ring-green-500"
                 />
-                <Label htmlFor="terms" className="text-sm text-gray-600">
+                <Label htmlFor="terms" className="text-sm text-muted-foreground">
                   I agree to the{" "}
                   <Link href="/terms" className="text-green-600 hover:text-green-500">
                     Terms of Service
@@ -263,7 +263,7 @@ export default function RegisterPage() {
             </form>
 
             <div className="mt-6 text-center">
-              <p className="text-sm text-gray-600">
+              <p className="text-sm text-muted-foreground">
                 Already have an account?{" "}
                 <Link href="/login" className="text-green-600 hover:text-green-500 font-medium">
                   Sign in here

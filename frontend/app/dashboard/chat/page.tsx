@@ -96,8 +96,8 @@ export default function ChatPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Doctor Chat Portal</h1>
-          <p className="text-gray-600">Communicate with your healthcare team and AI assistant</p>
+          <h1 className="text-3xl font-bold text-foreground">Doctor Chat Portal</h1>
+          <p className="text-muted-foreground">Communicate with your healthcare team and AI assistant</p>
         </div>
         <div className="flex items-center gap-2">
           <Badge variant="secondary" className="flex items-center gap-1">
@@ -134,11 +134,11 @@ export default function ChatPage() {
               <div className={`flex-1 max-w-[70%] ${message.sender === "user" ? "text-right" : "text-left"}`}>
                 <div className="flex items-center gap-2 mb-1">
                   <span className="text-sm font-medium text-gray-700">{getSenderName(message.sender)}</span>
-                  <span className="text-xs text-gray-500">{message.timestamp.toLocaleTimeString()}</span>
+                  <span className="text-xs text-muted-foreground">{message.timestamp.toLocaleTimeString()}</span>
                 </div>
                 <div
                   className={`p-3 rounded-lg ${
-                    message.sender === "user" ? "bg-teal-600 text-white" : "bg-gray-100 text-gray-900"
+                    message.sender === "user" ? "bg-teal-600 text-white" : "bg-gray-100 text-foreground"
                   }`}
                 >
                   <p className="text-sm">{message.content}</p>
@@ -165,7 +165,7 @@ export default function ChatPage() {
               <Send className="h-4 w-4" />
             </Button>
           </div>
-          <p className="text-xs text-gray-500 mt-2">
+          <p className="text-xs text-muted-foreground mt-2">
             This is an AI assistant. For medical emergencies, call 911 immediately.
           </p>
         </div>
@@ -173,10 +173,12 @@ export default function ChatPage() {
 
       {/* Quick Actions */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card>
+        <Card className="shadow-[0_0_15px_rgba(255,255,255,0.1)] hover:shadow-[0_0_25px_rgba(255,255,255,0.2)] transition-shadow">
+
+
           <CardContent className="p-4">
             <h3 className="font-medium mb-2">Upload Report</h3>
-            <p className="text-sm text-gray-600 mb-3">Share lab results or medical reports</p>
+            <p className="text-sm text-muted-foreground mb-3">Share lab results or medical reports</p>
             <Button variant="outline" size="sm" className="w-full bg-transparent">
               <Paperclip className="mr-2 h-3 w-3" />
               Upload File
@@ -184,20 +186,24 @@ export default function ChatPage() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="shadow-[0_0_15px_rgba(255,255,255,0.1)] hover:shadow-[0_0_25px_rgba(255,255,255,0.2)] transition-shadow">
+
+
           <CardContent className="p-4">
             <h3 className="font-medium mb-2">Schedule Appointment</h3>
-            <p className="text-sm text-gray-600 mb-3">Book a consultation with your doctor</p>
+            <p className="text-sm text-muted-foreground mb-3">Book a consultation with your doctor</p>
             <Button variant="outline" size="sm" className="w-full bg-transparent">
               Schedule Now
             </Button>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="shadow-[0_0_15px_rgba(255,255,255,0.1)] hover:shadow-[0_0_25px_rgba(255,255,255,0.2)] transition-shadow">
+
+
           <CardContent className="p-4">
             <h3 className="font-medium mb-2">Emergency Contact</h3>
-            <p className="text-sm text-gray-600 mb-3">Quick access to emergency services</p>
+            <p className="text-sm text-muted-foreground mb-3">Quick access to emergency services</p>
             <Button variant="destructive" size="sm" className="w-full">
               Emergency Call
             </Button>

@@ -31,8 +31,8 @@ export default function DashboardPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
-          <p className="text-gray-600">Welcome back! Here's your family's health overview.</p>
+          <h1 className="text-3xl font-bold text-foreground">Dashboard</h1>
+          <p className="text-muted-foreground">Welcome back! Here's your family's health overview.</p>
         </div>
         <Button onClick={() => setShowAddMemberModal(true)} className="bg-teal-600 hover:bg-teal-700">
           <Plus className="mr-2 h-4 w-4" />
@@ -42,7 +42,7 @@ export default function DashboardPage() {
 
       {/* Overview Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <Card className="border-l-4 border-l-teal-500">
+        <Card className="border-l-4 border-l-teal-500 shadow-[0_0_15px_rgba(13,148,136,0.7)] hover:shadow-[0_0_25px_rgba(13,148,136,1)] transition-shadow">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Family Members</CardTitle>
             <Users className="h-4 w-4 text-teal-600" />
@@ -53,7 +53,7 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
 
-        <Card className="border-l-4 border-l-blue-500">
+        <Card className="border-l-4 border-l-blue-500 shadow-[0_0_15px_rgba(59,130,246,0.7)] hover:shadow-[0_0_25px_rgba(59,130,246,1)] transition-shadow">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Medications Due</CardTitle>
             <Pill className="h-4 w-4 text-blue-600" />
@@ -64,7 +64,7 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
 
-        <Card className="border-l-4 border-l-green-500">
+        <Card className="border-l-4 border-l-green-500 shadow-[0_0_15px_rgba(34,197,94,0.7)] hover:shadow-[0_0_25px_rgba(34,197,94,1)] transition-shadow">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Upcoming Appointments</CardTitle>
             <Calendar className="h-4 w-4 text-green-600" />
@@ -75,7 +75,7 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
 
-        <Card className="border-l-4 border-l-red-500">
+        <Card className="border-l-4 border-l-red-500 shadow-[0_0_15px_rgba(239,68,68,0.7)] hover:shadow-[0_0_25px_rgba(239,68,68,1)] transition-shadow">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Critical Alerts</CardTitle>
             <AlertTriangle className="h-4 w-4 text-red-600" />
@@ -90,7 +90,7 @@ export default function DashboardPage() {
       {/* Recent Activity */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Recent Vitals */}
-        <Card>
+        <Card className="border-l-4  shadow-[0_0_15px_rgba(239,68,68,0.7)] hover:shadow-[0_0_25px_rgba(239,68,68,1)] transition-shadow">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Heart className="h-5 w-5 text-red-500" />
@@ -102,30 +102,30 @@ export default function DashboardPage() {
             {recentVitals ? (
               <div className="space-y-3">
                 <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-600">Blood Pressure</span>
+                  <span className="text-sm text-muted-foreground">Blood Pressure</span>
                   <Badge variant={recentVitals.bp_systolic > 140 ? "destructive" : "secondary"}>
                     {recentVitals.bp_systolic}/{recentVitals.bp_diastolic} mmHg
                   </Badge>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-600">Blood Sugar</span>
+                  <span className="text-sm text-muted-foreground">Blood Sugar</span>
                   <Badge variant={recentVitals.sugar > 140 ? "destructive" : "secondary"}>
                     {recentVitals.sugar} mg/dL
                   </Badge>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-600">Weight</span>
+                  <span className="text-sm text-muted-foreground">Weight</span>
                   <Badge variant="secondary">{recentVitals.weight} kg</Badge>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-600">Temperature</span>
+                  <span className="text-sm text-muted-foreground">Temperature</span>
                   <Badge variant={recentVitals.temperature > 99.5 ? "destructive" : "secondary"}>
                     {recentVitals.temperature}°F
                   </Badge>
                 </div>
               </div>
             ) : (
-              <p className="text-gray-500">No vitals recorded yet</p>
+              <p className="text-muted-foreground">No vitals recorded yet</p>
             )}
             <Link href="/dashboard/vitals">
               <Button variant="outline" className="w-full mt-4 bg-transparent">
@@ -136,7 +136,7 @@ export default function DashboardPage() {
         </Card>
 
         {/* Today's Medications */}
-        <Card>
+        <Card className="border-l-4 shadow-[0_0_15px_rgba(59,130,246,0.7)] hover:shadow-[0_0_25px_rgba(59,130,246,1)] transition-shadow">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Pill className="h-5 w-5 text-blue-500" />
@@ -151,7 +151,7 @@ export default function DashboardPage() {
                   <div key={med._id} className="flex justify-between items-center">
                     <div>
                       <p className="font-medium">{med.medicine_name}</p>
-                      <p className="text-sm text-gray-600">
+                      <p className="text-sm text-muted-foreground">
                         {med.dosage} - {med.frequency}
                       </p>
                     </div>
@@ -159,11 +159,11 @@ export default function DashboardPage() {
                   </div>
                 ))}
                 {todaysMeds.length > 3 && (
-                  <p className="text-sm text-gray-500">+{todaysMeds.length - 3} more medications</p>
+                  <p className="text-sm text-muted-foreground">+{todaysMeds.length - 3} more medications</p>
                 )}
               </div>
             ) : (
-              <p className="text-gray-500">No medications scheduled for today</p>
+              <p className="text-muted-foreground">No medications scheduled for today</p>
             )}
             <Link href="/dashboard/medications">
               <Button variant="outline" className="w-full mt-4 bg-transparent">
@@ -176,7 +176,7 @@ export default function DashboardPage() {
 
       {/* Critical Alerts */}
       {criticalAlerts.length > 0 && (
-        <Card className="border-red-200 bg-red-50">
+        <Card className="border-red-200 bg-red-50 dark:shadow-[0_0_10px_var(--glow-border)] transition-shadow">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-red-700">
               <AlertTriangle className="h-5 w-5" />
@@ -187,7 +187,7 @@ export default function DashboardPage() {
           <CardContent>
             <div className="space-y-3">
               {criticalAlerts.slice(0, 2).map((alert) => (
-                <div key={alert._id} className="p-3 bg-white rounded-lg border border-red-200">
+                <div key={alert._id} className="p-3 bg-card rounded-lg border border-red-200">
                   <p className="font-medium text-red-800">{alert.message}</p>
                   <p className="text-sm text-red-600">
                     {alert.timestamp.toLocaleDateString()} at {alert.timestamp.toLocaleTimeString()}
