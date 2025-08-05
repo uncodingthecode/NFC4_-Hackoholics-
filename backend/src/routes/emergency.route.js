@@ -1,7 +1,8 @@
 import express from "express";
 import {
   getEmergencyInfo,
-  shareEmergencyInfo
+  shareEmergencyInfo,
+  testEmailService
 } from "../controllers/emergency.controller.js";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
 
@@ -14,5 +15,8 @@ router.route("/")
 
 router.route("/share/:contactId")
   .post(shareEmergencyInfo);
+
+router.route("/test-email")
+  .post(testEmailService);
 
 export default router;
