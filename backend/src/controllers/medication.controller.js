@@ -1,5 +1,5 @@
-import { Medication } from "../models/medication.model.js";
-import { Notification } from "../models/notification.model.js";
+import  Medication  from "../models/medication.model.js";
+import  Notification  from "../models/notification.model.js";
 
 export const addMedication = async (req, res) => {
   try {

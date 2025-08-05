@@ -1,6 +1,6 @@
-import { AgentAlert } from "../models/agentAlert.model.js";
-import { Vital } from "../models/vital.model.js";
-import { Medication } from "../models/medication.model.js";
+import  AgentAlert  from "../models/agentAlert.model.js";
+import  Vital  from "../models/vital.model.js";
+import  Medication  from "../models/medication.model.js";
 
 export const getAlerts = async (req, res) => {
   try {

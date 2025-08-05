@@ -49,6 +49,8 @@ app.use('/prescriptions', express.static(path.join(__dirname, 'uploads/prescript
 //  Public Routes
 app.use('/api/v1/users', userRouter); 
 app.use('/api/v1/ocr', authLimiter, ocrRouter); 
+app.use('/api/v1/agent', agentRoutes); // Manual agent trigger route
+
 
 //Protected Routes 
 app.use('/api/v1/families', familyRouter);

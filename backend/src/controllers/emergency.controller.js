@@ -1,6 +1,6 @@
-import { Family } from "../models/family.model.js";
-import { Profile } from "../models/profile.model.js";
-import { Medication } from "../models/medication.model.js";
+import  Family  from "../models/family.model.js";
+import  Profile  from "../models/profile.model.js";
+import  Medication  from "../models/medication.model.js";
 
 export const getEmergencyInfo = async (req, res) => {
   try {

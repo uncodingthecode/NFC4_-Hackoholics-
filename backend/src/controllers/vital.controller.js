@@ -1,4 +1,4 @@
-import { Vital } from "../models/vital.model.js";
+import  Vital  from "../models/vital.model.js";
 
 export const recordVital = async (req, res) => {
   try {
