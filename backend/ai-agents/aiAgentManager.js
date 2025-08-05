@@ -1,4 +1,4 @@
-import { getAllUsers, runAgentForUser } from "./agent.js";
+import { getAllUsers, runAgentForUser } from "./agents.js";
 
 export function startAllAgents() {
   setInterval(() => {

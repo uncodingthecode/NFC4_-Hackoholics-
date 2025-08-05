@@ -38,7 +38,7 @@ export async function runAgentForUser(user) {
   }
 }
 
-// ✉️ Save alert
+// ✉ Save alert
 async function saveAlert(userId, type, message, severity) {
   await db.collection("agent_alerts").insertOne({
     user_id: userId,
@@ -51,7 +51,7 @@ async function saveAlert(userId, type, message, severity) {
   console.log(`[ALERT] (${userId}) ${type.toUpperCase()}: ${message}`);
 }
 
-// ✉️ Save notification
+// ✉ Save notification
 async function saveNotification(userId, type, message) {
   await db.collection("notifications").insertOne({
     user_id: userId,

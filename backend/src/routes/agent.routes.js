@@ -14,4 +14,3 @@ router.post("/run-now", async (req, res) => {
 });
 
 export default router;
-
