@@ -34,6 +34,7 @@ export function AddEmergencyContactModal({ open, onOpenChange }: AddEmergencyCon
   })
   const [isLoading, setIsLoading] = useState(false)
   const { toast } = useToast()
+  const { family, updateEmergencyContacts } = useHealthcare()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -50,6 +51,7 @@ export function AddEmergencyContactModal({ open, onOpenChange }: AddEmergencyCon
       setFormData({ name: "", relation: "", email: "", phone: "" })
       onOpenChange(false)
     } catch (error) {
+      console.error('Error adding emergency contact:', error)
       toast({
         title: "Error",
         description: "Could not add contact. Try again.",

@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { MessageCircle, Send, Paperclip, User, Bot } from "lucide-react"
+import { useHealthcare } from "@/context/healthcare-context"
+import { useToast } from "@/hooks/use-toast"
 
 interface Message {
   id: string
@@ -16,48 +18,56 @@ interface Message {
 }
 
 export default function ChatPage() {
-  const [messages, setMessages] = useState<Message[]>([])
-  const [newMessage, setNewMessage] = useState("")
-
-  // Replace simulated AI response
-const [isLoading, setIsLoading] = useState(false);
-
-const handleSendMessage = async () => {
-  if (!newMessage.trim()) return;
-
-  const message: Message = {
-    id: Date.now().toString(),
-    sender: "user",
-    content: newMessage,
-    timestamp: new Date(),
-  };
-
-  setMessages((prev) => [...prev, message]);
-  setNewMessage("");
-  setIsLoading(true);
-
-  try {
-    const res = await fetch("http://localhost:8000/api/chat", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ message: newMessage }),
-    });
-
-    const data = await res.json();
-    const aiResponse: Message = {
-      id: (Date.now() + 1).toString(),
+  const [messages, setMessages] = useState<Message[]>([
+    {
+      id: "welcome",
       sender: "ai",
-      content: data.reply,
+      content: "Hello! I'm your AI health assistant. I can help you with general health questions, medication information, and wellness advice. Remember, I'm here to provide information and support, but for medical emergencies, please call 911 immediately. How can I help you today?",
+      timestamp: new Date(),
+    }
+  ])
+  const [newMessage, setNewMessage] = useState("")
+  const [isLoading, setIsLoading] = useState(false)
+  const { sendChatMessage, user, profile } = useHealthcare()
+  const { toast } = useToast()
+
+  const handleSendMessage = async () => {
+    if (!newMessage.trim()) return;
+
+    const userMessage: Message = {
+      id: Date.now().toString(),
+      sender: "user",
+      content: newMessage,
       timestamp: new Date(),
     };
 
-    setMessages((prev) => [...prev, aiResponse]);
-  } catch (err) {
-    console.error("Error fetching AI reply", err);
-  } finally {
-    setIsLoading(false);
-  }
-};
+    setMessages((prev) => [...prev, userMessage]);
+    const currentMessage = newMessage;
+    setNewMessage("");
+    setIsLoading(true);
+
+    try {
+      const aiReply = await sendChatMessage(currentMessage);
+      
+      const aiResponse: Message = {
+        id: (Date.now() + 1).toString(),
+        sender: "ai",
+        content: aiReply,
+        timestamp: new Date(),
+      };
+
+      setMessages((prev) => [...prev, aiResponse]);
+    } catch (error) {
+      console.error("Error getting AI reply:", error);
+      toast({
+        title: "Error",
+        description: "Failed to get AI response. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
 
 
@@ -81,7 +91,7 @@ const handleSendMessage = async () => {
       case "doctor":
         return "Dr. Johnson"
       case "ai":
-        return "AI Assistant"
+        return "Health AI Assistant"
       default:
         return "Unknown"
     }
@@ -142,6 +152,30 @@ const handleSendMessage = async () => {
               </div>
             </div>
           ))}
+          
+          {/* Loading indicator */}
+          {isLoading && (
+            <div className="flex gap-3">
+              <div className="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center bg-blue-100">
+                <Bot className="h-4 w-4 text-teal-600" />
+              </div>
+              <div className="flex-1 max-w-[70%]">
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-sm font-medium text-gray-700">Health AI Assistant</span>
+                </div>
+                <div className="p-3 rounded-lg bg-gray-100 text-foreground">
+                  <div className="flex items-center gap-2">
+                    <div className="flex space-x-1">
+                      <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
+                      <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                      <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                    </div>
+                    <span className="text-sm text-gray-500">AI is thinking...</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
         </CardContent>
 
         {/* Message Input */}
@@ -154,10 +188,15 @@ const handleSendMessage = async () => {
               placeholder="Type your message..."
               value={newMessage}
               onChange={(e) => setNewMessage(e.target.value)}
-              onKeyPress={(e) => e.key === "Enter" && handleSendMessage()}
+              onKeyPress={(e) => e.key === "Enter" && !isLoading && handleSendMessage()}
+              disabled={isLoading}
               className="flex-1"
             />
-            <Button onClick={handleSendMessage} className="bg-teal-600 hover:bg-teal-700">
+            <Button 
+              onClick={handleSendMessage} 
+              disabled={isLoading || !newMessage.trim()}
+              className="bg-teal-600 hover:bg-teal-700 disabled:opacity-50"
+            >
               <Send className="h-4 w-4" />
             </Button>
           </div>

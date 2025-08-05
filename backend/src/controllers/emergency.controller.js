@@ -2,6 +2,7 @@ import Family from "../models/family.model.js";
 import Profile from "../models/profile.model.js";
 import Medication from "../models/medication.model.js";
 import { sendEmergencyEmail } from "../utils/mailer.js";
+import { healthChatbot } from "../utils/geminiService.js";
 
 // ✅ GET /api/emergency/
 export const getEmergencyInfo = async (req, res) => {
@@ -192,5 +193,60 @@ export const testEmergency = async (req, res) => {
   } catch (error) {
     console.error("❌ testEmergency error:", error);
     return res.status(500).json({ error: error.message });
+  }
+};
+
+// Generate AI summary for health reports
+export const generateHealthReportSummary = async (req, res) => {
+  try {
+    const { vitals, medications, profile, healthScoreData } = req.body;
+    
+    // Prepare data for AI analysis
+    const healthData = {
+      vitals: vitals || [],
+      medications: medications || [],
+      profile: profile || {},
+      healthScoreData: healthScoreData || []
+    };
+
+    // Create a comprehensive prompt for the AI
+    const userMessage = `Please analyze the following health data and provide a comprehensive AI-generated health summary report. Include insights, trends, recommendations, and any concerning patterns. Format the response with proper sections, bullet points, and clear headings.
+
+Health Data:
+- Patient Profile: ${JSON.stringify(profile)}
+- Vital Signs: ${JSON.stringify(vitals)}
+- Current Medications: ${JSON.stringify(medications)}
+- Health Score Trend: ${JSON.stringify(healthScoreData)}
+
+Please provide a detailed analysis including:
+1. Overall Health Assessment
+2. Vital Signs Analysis
+3. Medication Management
+4. Health Trends
+5. Recommendations
+6. Risk Factors (if any)
+7. Next Steps`;
+
+    const userContext = {
+      name: profile?.user_id || "Patient",
+      age: profile?.DOB ? Math.floor((new Date().getTime() - new Date(profile.DOB).getTime()) / (365.25 * 24 * 60 * 60 * 1000)) : "Not provided",
+      bloodGroup: profile?.blood_group || "Not provided",
+      conditions: [],
+      medications: medications?.map(m => ({ name: m.medicine_name, dosage: m.dosage })) || []
+    };
+
+    const aiSummary = await healthChatbot(userMessage, userContext);
+
+    res.status(200).json({
+      success: true,
+      summary: aiSummary
+    });
+  } catch (error) {
+    console.error("Error generating health report summary:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to generate health report summary",
+      error: error.message
+    });
   }
 };

@@ -43,10 +43,13 @@ interface OCRUploaderProps {
 }
 
 export function OCRUploader({ onClose, onUploadComplete }: OCRUploaderProps) {
+  const { uploadPrescription, processPrescriptionWithGemini } = useHealthcare()
+  const { toast } = useToast()
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
   const [isProcessing, setIsProcessing] = useState(false)
   const [ocrResult, setOcrResult] = useState<OCRResult | null>(null)
+  const [uploadedPrescriptionId, setUploadedPrescriptionId] = useState<string | null>(null)
 
   const handleFileSelect = useCallback((file: File) => {
     setSelectedFile(file)

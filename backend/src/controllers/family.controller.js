@@ -42,32 +42,44 @@ export const getFamilyDetails = async (req, res) => {
 
 export const addFamilyMember = async (req, res) => {
   try {
-    const { email } = req.body;
+    const { name, email, password, relation } = req.body;
     const familyId = req.user.family_id;
 
-    if (!email) {
-      return res.status(400).json({ error: "Member email is required" });
+    if (!name || !email || !password) {
+      return res.status(400).json({ error: "Name, email, and password are required" });
     }
 
-    const userToAdd = await User.findOne({ email });
-    if (!userToAdd) {
-      return res.status(404).json({ error: "User not found" });
+    // Check if user with this email already exists
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(400).json({ error: "User with this email already exists" });
     }
 
-    if (userToAdd.family_id) {
-      return res.status(400).json({ error: "User already belongs to a family" });
-    }
-
-    await Family.findByIdAndUpdate(familyId, {
-      $addToSet: { members: userToAdd._id }
-    });
-
-    await User.findByIdAndUpdate(userToAdd._id, {
+    // Create new user
+    const newUser = await User.create({
+      name,
+      email,
+      password_hash: password, // This will be hashed by the pre-save middleware
+      role: 'member',
       family_id: familyId,
-      role: 'member'
+      relation: relation || 'other'
     });
 
-    return res.status(200).json({ message: "Member added successfully" });
+    // Add user to family
+    await Family.findByIdAndUpdate(familyId, {
+      $addToSet: { members: newUser._id }
+    });
+
+    return res.status(201).json({ 
+      message: "Family member created and added successfully",
+      user: {
+        _id: newUser._id,
+        name: newUser.name,
+        email: newUser.email,
+        role: newUser.role,
+        relation: newUser.relation
+      }
+    });
   } catch (error) {
     return res.status(500).json({ error: error.message });
   }

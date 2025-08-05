@@ -4,21 +4,33 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { useHealthcare } from "@/context/healthcare-context"
 import { User, Calendar, Ruler, Weight, Droplets } from "lucide-react"
+import { calculateAge, formatAge, calculateBMI, formatBMI } from "@/lib/utils"
 
-interface ProfileCardProps {
-  userId: string
-}
-
-export function ProfileCard({ userId }: ProfileCardProps) {
-  const { profiles } = useHealthcare()
-  const profile = profiles.find((p) => p.user_id === userId)
+export function ProfileCard() {
+  const { profile, user } = useHealthcare()
 
   if (!profile) {
-    return null
+    return (
+      <Card className="bg-gradient-to-r from-teal-50 to-blue-50 border-teal-200">
+        <CardContent className="p-6">
+          <div className="flex items-start gap-6">
+            <div className="p-4 bg-teal-100 rounded-full">
+              <User className="h-8 w-8 text-teal-600" />
+            </div>
+            <div className="flex-1">
+              <h2 className="text-2xl font-bold text-foreground">
+                {user?.name || 'User'}'s Health Profile
+              </h2>
+              <p className="text-muted-foreground">No profile data available. Please edit your profile to add information.</p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    )
   }
 
-  const age = new Date().getFullYear() - profile.DOB.getFullYear()
-  const bmi = profile.weight / (profile.height / 100) ** 2
+  const age = calculateAge(profile.DOB)
+  const bmi = calculateBMI(profile.weight, profile.height)
 
   return (
     <Card className="bg-gradient-to-r from-teal-50 to-blue-50 border-teal-200">
@@ -30,7 +42,9 @@ export function ProfileCard({ userId }: ProfileCardProps) {
 
           <div className="flex-1 space-y-4">
             <div>
-              <h2 className="text-2xl font-bold text-foreground">Health Profile</h2>
+              <h2 className="text-2xl font-bold text-foreground">
+                {user?.name || 'User'}'s Health Profile
+              </h2>
               <p className="text-muted-foreground">Personal health information overview</p>
             </div>
 
@@ -39,7 +53,9 @@ export function ProfileCard({ userId }: ProfileCardProps) {
                 <Calendar className="h-4 w-4 text-muted-foreground" />
                 <div>
                   <p className="text-sm text-muted-foreground">Age</p>
-                  <p className="font-medium">{age} years</p>
+                  <p className="font-medium">
+                    {formatAge(age, !!profile.DOB)}
+                  </p>
                 </div>
               </div>
 
@@ -47,7 +63,7 @@ export function ProfileCard({ userId }: ProfileCardProps) {
                 <Ruler className="h-4 w-4 text-muted-foreground" />
                 <div>
                   <p className="text-sm text-muted-foreground">Height</p>
-                  <p className="font-medium">{profile.height} cm</p>
+                  <p className="font-medium">{profile.height || 0} cm</p>
                 </div>
               </div>
 
@@ -55,7 +71,7 @@ export function ProfileCard({ userId }: ProfileCardProps) {
                 <Weight className="h-4 w-4 text-muted-foreground" />
                 <div>
                   <p className="text-sm text-muted-foreground">Weight</p>
-                  <p className="font-medium">{profile.weight} kg</p>
+                  <p className="font-medium">{profile.weight || 0} kg</p>
                 </div>
               </div>
 
@@ -70,15 +86,20 @@ export function ProfileCard({ userId }: ProfileCardProps) {
 
             <div className="flex flex-wrap items-center gap-2">
               <Badge variant="outline" className="bg-card">
-                BMI: {bmi.toFixed(1)}
+                BMI: {formatBMI(bmi)}
               </Badge>
               <Badge variant="outline" className="bg-card">
-                {profile.gender}
+                {profile.gender || "N/A"}
               </Badge>
-              {profile.allergies.length > 0 && (
+              {profile.family_doctor_email && profile.family_doctor_email.length > 0 && (
+                <Badge variant="outline" className="bg-card">
+                  {profile.family_doctor_email.length} Doctor{profile.family_doctor_email.length !== 1 ? 's' : ''}
+                </Badge>
+              )}
+              {profile.allergies && profile.allergies.length > 0 && (
                 <Badge variant="destructive">{profile.allergies.length} Allergies</Badge>
               )}
-              {profile.existing_conditions.length > 0 && (
+              {profile.existing_conditions && profile.existing_conditions.length > 0 && (
                 <Badge variant="secondary">{profile.existing_conditions.length} Conditions</Badge>
               )}
             </div>
@@ -88,3 +109,4 @@ export function ProfileCard({ userId }: ProfileCardProps) {
     </Card>
   )
 }
+

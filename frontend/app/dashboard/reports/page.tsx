@@ -23,7 +23,7 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Download, FileText, TrendingUp, Activity, Pill, Heart } from "lucide-react";
 
 export default function ReportsPage() {
-  const { vitals, medications, profile } = useHealthcare();
+  const { vitals, medications, profile, generateHealthReportSummary } = useHealthcare();
   const reportRef = useRef<HTMLDivElement>(null);
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
 
@@ -76,21 +76,31 @@ export default function ReportsPage() {
     { month: "Jun", score: 88 },
   ];
 
-  const downloadReport = () => {
+  const downloadReport = async () => {
     setIsGeneratingPDF(true);
     
     try {
+      // Generate AI summary
+      const aiSummary = await generateHealthReportSummary({
+        vitals: chartData,
+        medications,
+        profile,
+        healthScoreData
+      });
+
+      // Create PDF with AI summary
       const pdf = new jsPDF("p", "mm", "a4");
-      let yPosition = 20;
+      let yPosition = 25;
       const pageHeight = 297;
-      const margin = 20;
-      const lineHeight = 7;
+      const margin = 25;
+      const rightMargin = 25;
+      const maxWidth = 210 - margin - rightMargin;
       
-      // Helper function to add text and handle page breaks
-      const addText = (text: string, fontSize: number = 12, isBold: boolean = false) => {
+      // Helper function to add text with word wrapping
+      const addText = (text: string, fontSize: number = 12, isBold: boolean = false, indent: number = 0) => {
         if (yPosition > pageHeight - margin) {
           pdf.addPage();
-          yPosition = 20;
+          yPosition = 25;
         }
         
         pdf.setFontSize(fontSize);
@@ -100,89 +110,128 @@ export default function ReportsPage() {
           pdf.setFont('helvetica', 'normal');
         }
         
-        pdf.text(text, margin, yPosition);
-        yPosition += lineHeight + (fontSize - 12) * 0.5;
+        // Split text into lines that fit within the page width
+        const lines = pdf.splitTextToSize(text, maxWidth - indent);
+        
+        lines.forEach((line: string) => {
+          if (yPosition > pageHeight - margin) {
+            pdf.addPage();
+            yPosition = 25;
+          }
+          pdf.text(line, margin + indent, yPosition);
+          yPosition += fontSize * 0.4;
+        });
+        
+        yPosition += 2; // Add some spacing between paragraphs
       };
 
-      // Header
-      addText("HEALTH SUMMARY REPORT", 20, true);
-      addText(`Generated on ${new Date().toLocaleDateString()}`, 12);
-      yPosition += 10;
+      // Helper function to add a section divider
+      const addSectionDivider = () => {
+        yPosition += 5;
+        pdf.setDrawColor(200, 200, 200);
+        pdf.line(margin, yPosition, 210 - rightMargin, yPosition);
+        yPosition += 10;
+      };
 
-      // Patient Information
+      // Header with professional styling
+      pdf.setFillColor(41, 128, 185); // Blue background
+      pdf.rect(0, 0, 210, 40, 'F');
+      
+      pdf.setTextColor(255, 255, 255);
+      pdf.setFontSize(24);
+      pdf.setFont('helvetica', 'bold');
+      pdf.text("AI-GENERATED HEALTH SUMMARY REPORT", 105, 20, { align: 'center' });
+      
+      pdf.setFontSize(12);
+      pdf.setFont('helvetica', 'normal');
+      pdf.text(`Generated on ${new Date().toLocaleDateString()}`, 105, 30, { align: 'center' });
+      
+      // Reset text color and position
+      pdf.setTextColor(0, 0, 0);
+      yPosition = 50;
+
+      // Patient Information Section
       if (profile) {
         addText("PATIENT INFORMATION", 16, true);
-        yPosition += 5;
-        addText(`Name: ${profile.gender === "Male" ? "Mr." : "Ms."} ${profile.user_id}`);
-        addText(`Age: ${Math.floor((new Date().getTime() - new Date(profile.DOB).getTime()) / (365.25 * 24 * 60 * 60 * 1000))} years`);
-        addText(`Gender: ${profile.gender}`);
-        addText(`Blood Group: ${profile.blood_group}`);
-        addText(`Height: ${profile.height} cm`);
-        addText(`Weight: ${profile.weight} kg`);
-        yPosition += 10;
-      }
-
-      // Current Vitals
-      addText("CURRENT VITALS SUMMARY", 16, true);
-      yPosition += 5;
-      if (last) {
-        addText(`Blood Pressure: ${last.systolic}/${last.diastolic} mmHg`);
-        addText(`Blood Sugar: ${last.sugar} mg/dL`);
-        addText(`Weight: ${last.weight} kg`);
-        addText(`Temperature: ${last.temperature} °F`);
-      } else {
-        addText("No vitals recorded");
-      }
-      yPosition += 10;
-
-      // Health Progress
-      if (first && last) {
-        addText("HEALTH PROGRESS COMPARISON", 16, true);
-        yPosition += 5;
-        addText(`Blood Pressure: ${first.systolic}/${first.diastolic} → ${last.systolic}/${last.diastolic} mmHg`);
-        addText(`Blood Sugar: ${first.sugar} → ${last.sugar} mg/dL`);
-        addText(`Weight: ${first.weight} → ${last.weight} kg`);
-        addText(`Temperature: ${first.temperature} → ${last.temperature} °F`);
-        yPosition += 10;
-      }
-
-      // Medication Adherence
-      addText("MEDICATION ADHERENCE", 16, true);
-      yPosition += 5;
-      addText("Taken: 85%");
-      addText("Missed: 15%");
-      addText("Status: Excellent adherence rate!");
-      yPosition += 10;
-
-      // Health Score Trend
-      addText("HEALTH SCORE TREND (Last 6 Months)", 16, true);
-      yPosition += 5;
-      healthScoreData.forEach((data) => {
-        addText(`${data.month}: ${data.score}/100`);
-      });
-      yPosition += 10;
-
-      // Current Medications
-      addText("CURRENT MEDICATIONS", 16, true);
-      yPosition += 5;
-      if (medications.length === 0) {
-        addText("No medications currently prescribed.");
-      } else {
-        medications.forEach((med) => {
-          addText(`${med.medicine_name} - ${med.dosage}`, 12, true);
-          addText(`  Frequency: ${med.frequency}`);
-          addText(`  Timing: ${med.timing.join(", ")}`);
-          addText(`  Stock: ${med.stock_count}${med.stock_count <= med.refill_alert_threshold ? " (LOW STOCK)" : ""}`);
-          yPosition += 2;
+        yPosition += 3;
+        
+        const patientInfo = [
+          { label: "Name", value: `${profile.gender === "Male" ? "Mr." : "Ms."} ${profile.user_id}` },
+          { label: "Age", value: `${Math.floor((new Date().getTime() - new Date(profile.DOB).getTime()) / (365.25 * 24 * 60 * 60 * 1000))} years` },
+          { label: "Gender", value: profile.gender },
+          { label: "Blood Group", value: profile.blood_group },
+          { label: "Height", value: `${profile.height} cm` },
+          { label: "Weight", value: `${profile.weight} kg` }
+        ];
+        
+        patientInfo.forEach(({ label, value }) => {
+          addText(`${label}: ${value}`, 12, false, 10);
         });
+        
+        addSectionDivider();
       }
 
-      // Footer
-      yPosition += 10;
-      addText("This report was generated automatically by the HealthCare Management System", 10);
-      addText("For any questions, please consult with your healthcare provider", 10);
+      // AI Summary Section with better formatting
+      addText("AI HEALTH ANALYSIS", 18, true);
+      yPosition += 5;
+      
+      // Process AI summary with better formatting
+      const summaryLines = aiSummary.split('\n');
+      let inList = false;
+      
+      summaryLines.forEach((line) => {
+        const trimmedLine = line.trim();
+        if (!trimmedLine) {
+          yPosition += 3; // Add spacing for empty lines
+          return;
+        }
+        
+        // Detect different types of content for better formatting
+        if (trimmedLine.startsWith('**') && trimmedLine.endsWith('**')) {
+          // Bold headers
+          addText(trimmedLine.replace(/\*\*/g, ''), 14, true);
+        } else if (trimmedLine.startsWith('* ') || trimmedLine.startsWith('- ')) {
+          // Bullet points
+          if (!inList) {
+            yPosition += 2;
+            inList = true;
+          }
+          addText(`• ${trimmedLine.substring(2)}`, 12, false, 15);
+        } else if (trimmedLine.match(/^\d+\./)) {
+          // Numbered lists
+          if (!inList) {
+            yPosition += 2;
+            inList = true;
+          }
+          addText(trimmedLine, 12, false, 15);
+        } else if (trimmedLine.includes('**') && trimmedLine.includes(':')) {
+          // Bold labels
+          addText(trimmedLine, 12, true);
+        } else {
+          // Regular text
+          if (inList) {
+            yPosition += 2;
+            inList = false;
+          }
+          addText(trimmedLine, 12, false);
+        }
+      });
 
-      pdf.save(`Health_Report_${new Date().toISOString().split('T')[0]}.pdf`);
+      // Footer with professional styling
+      addSectionDivider();
+      
+      pdf.setFontSize(10);
+      pdf.setFont('helvetica', 'italic');
+      pdf.setTextColor(100, 100, 100);
+      
+      const footerText = "This AI-generated report was created by the HealthCare Management System";
+      const footerText2 = "For any questions, please consult with your healthcare provider";
+      
+      pdf.text(footerText, 105, yPosition, { align: 'center' });
+      yPosition += 5;
+      pdf.text(footerText2, 105, yPosition, { align: 'center' });
+
+      pdf.save(`AI_Health_Report_${new Date().toISOString().split('T')[0]}.pdf`);
     } catch (error) {
       console.error("Error generating PDF:", error);
       alert("PDF generation failed. Please try again.");

@@ -12,6 +12,11 @@ const prescriptionSchema = new mongoose.Schema({
   },
   image_url: String,
   ocr_text: String,
+  status: {
+    type: String,
+    enum: ["processing", "completed", "error"],
+    default: "processing"
+  },
   extracted_medications: [
     {
       name: String,
