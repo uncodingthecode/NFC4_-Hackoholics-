@@ -2,6 +2,7 @@
 
 import type React from "react"
 import { createContext, useContext, useState, useEffect } from "react"
+import { apiClient } from "@/lib/api"
 
 interface User {
   _id: string
@@ -86,6 +87,7 @@ interface HealthcareContextType {
   user: User | null
   family: Family | null
   profiles: Profile[]
+  profile: Profile | null
   medications: Medication[]
   vitals: Vital[]
   alerts: Alert[]
@@ -114,122 +116,198 @@ export function HealthcareProvider({ children }: { children: React.ReactNode }) 
   const [appointments, setAppointments] = useState<Appointment[]>([])
   const [darkMode, setDarkMode] = useState(false)
 
-  // Mock data initialization
+  // Check for existing authentication and initialize data
   useEffect(() => {
-    // Initialize with mock data
-    const mockUser: User = {
-      _id: "user1",
-      name: "John Smith",
-      email: "john@example.com",
-      role: "head",
-      family_id: "family1",
-      created_at: new Date(),
+    const checkAuth = async () => {
+      const storedUser = localStorage.getItem("user")
+      const accessToken = localStorage.getItem("accessToken")
+      
+      if (storedUser && accessToken) {
+        try {
+          // Verify token is still valid by calling a protected endpoint
+          const response = await apiClient.getCurrentUser()
+          
+          if (response.success) {
+            const userData = JSON.parse(storedUser)
+            setUser(userData)
+            // Load user-specific data from backend here
+            return
+          } else {
+            // Token is invalid, clear storage
+            localStorage.removeItem("accessToken")
+            localStorage.removeItem("refreshToken")
+            localStorage.removeItem("user")
+          }
+        } catch (error) {
+          console.error("Auth check failed:", error)
+          // Clear storage on error
+          localStorage.removeItem("accessToken")
+          localStorage.removeItem("refreshToken")
+          localStorage.removeItem("user")
+        }
+      }
+
+      // If no valid auth, load mock data for demo purposes
+      const mockUser: User = {
+        _id: "user1",
+        name: "John Smith",
+        email: "john@example.com",
+        role: "head",
+        family_id: "family1",
+        created_at: new Date(),
+      }
+
+      const mockFamily: Family = {
+        _id: "family1",
+        name: "Smith Family",
+        head_id: "user1",
+        members: ["user1", "user2", "user3"],
+        emergency_contacts: [
+          { name: "Dr. Johnson", relation: "Family Doctor", phone: "+1-555-0123" },
+          { name: "Sarah Smith", relation: "Sister", phone: "+1-555-0124" },
+        ],
+      }
+
+      const mockProfiles: Profile[] = [
+        {
+          _id: "profile1",
+          user_id: "user1",
+          DOB: new Date("1985-06-15"),
+          height: 175,
+          weight: 70,
+          gender: "Male",
+          blood_group: "O+",
+          family_doctor_email: ["dr.johnson@clinic.com"],
+          allergies: ["Peanuts"],
+          existing_conditions: ["Hypertension"],
+          medications: ["med1"],
+        },
+      ]
+
+      const mockMedications: Medication[] = [
+        {
+          _id: "med1",
+          user_id: "user1",
+          medicine_name: "Lisinopril",
+          dosage: "10mg",
+          frequency: "Once daily",
+          timing: ["08:00"],
+          start_date: new Date("2024-01-01"),
+          end_date: new Date("2024-12-31"),
+          stock_count: 25,
+          refill_alert_threshold: 10,
+        },
+      ]
+
+      const mockVitals: Vital[] = [
+        {
+          _id: "vital1",
+          user_id: "user1",
+          timestamp: new Date(),
+          bp_systolic: 130,
+          bp_diastolic: 85,
+          sugar: 95,
+          weight: 70,
+          temperature: 98.6,
+        },
+      ]
+
+      const mockAlerts: Alert[] = [
+        {
+          _id: "alert1",
+          user_id: "user1",
+          timestamp: new Date(),
+          type: "vital_alert",
+          message: "Blood pressure reading is elevated. Consider consulting your doctor.",
+          severity: "moderate",
+          acknowledged: false,
+        },
+      ]
+
+      const mockAppointments: Appointment[] = [
+        {
+          _id: "appt1",
+          user_id: "user1",
+          doctor_name: "Dr. Johnson",
+          date: new Date("2024-02-15T10:00:00"),
+          type: "Regular Checkup",
+          notes: "Annual physical examination",
+          reminder: true,
+        },
+      ]
+
+      setUser(mockUser)
+      setFamily(mockFamily)
+      setProfiles(mockProfiles)
+      setMedications(mockMedications)
+      setVitals(mockVitals)
+      setAlerts(mockAlerts)
+      setAppointments(mockAppointments)
     }
 
-    const mockFamily: Family = {
-      _id: "family1",
-      name: "Smith Family",
-      head_id: "user1",
-      members: ["user1", "user2", "user3"],
-      emergency_contacts: [
-        { name: "Dr. Johnson", relation: "Family Doctor", phone: "+1-555-0123" },
-        { name: "Sarah Smith", relation: "Sister", phone: "+1-555-0124" },
-      ],
-    }
-
-    const mockProfiles: Profile[] = [
-      {
-        _id: "profile1",
-        user_id: "user1",
-        DOB: new Date("1985-06-15"),
-        height: 175,
-        weight: 70,
-        gender: "Male",
-        blood_group: "O+",
-        family_doctor_email: ["dr.johnson@clinic.com"],
-        allergies: ["Peanuts"],
-        existing_conditions: ["Hypertension"],
-        medications: ["med1"],
-      },
-    ]
-
-    const mockMedications: Medication[] = [
-      {
-        _id: "med1",
-        user_id: "user1",
-        medicine_name: "Lisinopril",
-        dosage: "10mg",
-        frequency: "Once daily",
-        timing: ["08:00"],
-        start_date: new Date("2024-01-01"),
-        end_date: new Date("2024-12-31"),
-        stock_count: 25,
-        refill_alert_threshold: 10,
-      },
-    ]
-
-    const mockVitals: Vital[] = [
-      {
-        _id: "vital1",
-        user_id: "user1",
-        timestamp: new Date(),
-        bp_systolic: 130,
-        bp_diastolic: 85,
-        sugar: 95,
-        weight: 70,
-        temperature: 98.6,
-      },
-    ]
-
-    const mockAlerts: Alert[] = [
-      {
-        _id: "alert1",
-        user_id: "user1",
-        timestamp: new Date(),
-        type: "vital_alert",
-        message: "Blood pressure reading is elevated. Consider consulting your doctor.",
-        severity: "moderate",
-        acknowledged: false,
-      },
-    ]
-
-    const mockAppointments: Appointment[] = [
-      {
-        _id: "appt1",
-        user_id: "user1",
-        doctor_name: "Dr. Johnson",
-        date: new Date("2024-02-15T10:00:00"),
-        type: "Regular Checkup",
-        notes: "Annual physical examination",
-        reminder: true,
-      },
-    ]
-
-    setUser(mockUser)
-    setFamily(mockFamily)
-    setProfiles(mockProfiles)
-    setMedications(mockMedications)
-    setVitals(mockVitals)
-    setAlerts(mockAlerts)
-    setAppointments(mockAppointments)
+    checkAuth()
   }, [])
 
   const login = async (email: string, password: string): Promise<boolean> => {
-    // Mock login logic
-    if (email === "john@example.com" && password === "password") {
+    try {
+      // Check if we already have user data from localStorage (from login page)
+      const storedUser = localStorage.getItem("user")
+      const accessToken = localStorage.getItem("accessToken")
+      
+      if (storedUser && accessToken) {
+        const userData = JSON.parse(storedUser)
+        setUser(userData)
+        return true
+      }
+
+      // If no stored data, try to authenticate with backend
+      const response = await apiClient.login(email, password)
+
+      if (!response.success) {
+        console.error("Login failed:", response.error)
+        return false
+      }
+
+      // Store tokens and user data
+      const { accessToken: token, refreshToken, user } = response.data as {
+        accessToken: string
+        refreshToken: string
+        user: any
+      }
+      
+      localStorage.setItem("accessToken", token)
+      localStorage.setItem("refreshToken", refreshToken)
+      localStorage.setItem("user", JSON.stringify(user))
+
+      // Update context
+      setUser(user)
       return true
+    } catch (error) {
+      console.error("Login error:", error)
+      return false
     }
-    return false
   }
 
-  const logout = () => {
-    setUser(null)
-    setFamily(null)
-    setProfiles([])
-    setMedications([])
-    setVitals([])
-    setAlerts([])
-    setAppointments([])
+  const logout = async () => {
+    try {
+      // Call backend logout endpoint
+      await apiClient.logout()
+    } catch (error) {
+      console.error("Logout error:", error)
+    } finally {
+      // Clear local storage and state
+      localStorage.removeItem("accessToken")
+      localStorage.removeItem("refreshToken")
+      localStorage.removeItem("user")
+      
+      setUser(null)
+      setFamily(null)
+      setProfiles([])
+      setMedications([])
+      setVitals([])
+      setAlerts([])
+      setAppointments([])
+    }
   }
 
   const toggleDarkMode = () => {
@@ -297,12 +375,16 @@ export function HealthcareProvider({ children }: { children: React.ReactNode }) 
     setAlerts((prev) => prev.map((alert) => (alert._id === alertId ? { ...alert, acknowledged: true } : alert)))
   }
 
+  // Get current user's profile
+  const profile = user ? profiles.find(p => p.user_id === user._id) || null : null
+
   return (
     <HealthcareContext.Provider
       value={{
         user,
         family,
         profiles,
+        profile,
         medications,
         vitals,
         alerts,

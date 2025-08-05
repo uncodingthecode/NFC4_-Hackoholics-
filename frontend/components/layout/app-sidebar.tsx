@@ -1,6 +1,6 @@
 "use client"
 
-import { Calendar, Heart, Home, MessageCircle, Pill, Shield, TrendingUp, User, FileText, Bell } from "lucide-react"
+import { Calendar, Heart, Home, MessageCircle, Pill, Shield, TrendingUp, User, FileText, Bell, BarChart2 } from "lucide-react"
 import {
   Sidebar,
   SidebarContent,
@@ -62,6 +62,11 @@ const menuItems = [
     title: "Chat",
     url: "/dashboard/chat",
     icon: MessageCircle,
+  },
+  {
+    title: "Reports",
+    url: "/dashboard/reports",
+    icon: BarChart2,
   },
 ]
 
