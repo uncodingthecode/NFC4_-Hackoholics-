@@ -20,9 +20,14 @@ import {chatRoute} from './routes/chat.js';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+const corsOptions = {
+  origin: ['http://localhost:3000', 'http://localhost:3001'],  // allow both frontend ports
+  credentials: true,                // allow cookies and auth headers
+};
+
 const app = express();
-app.use(cors(
-));
+app.use(cors(corsOptions));
+
 app.use(cookieParser()); // For JWT cookies
 
 app.use(express.json({ limit: '16kb' }));
