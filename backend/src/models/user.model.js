@@ -30,7 +30,9 @@ const userSchema = new mongoose.Schema(
     family_id: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Family",
-      required: true,
+      required: function() {
+        return this.role === 'member';
+      },
     },
     refreshToken: {
       type: String,
