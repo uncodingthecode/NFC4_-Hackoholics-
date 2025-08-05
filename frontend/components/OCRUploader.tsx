@@ -1,13 +1,29 @@
 "use client"
 
 import type React from "react"
-
 import { useState, useCallback } from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { Upload, FileText, Camera, Check, X, Loader2 } from "lucide-react"
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
+import {
+  Upload,
+  FileText,
+  Camera,
+  Check,
+  X,
+  Loader2,
+} from "lucide-react"
 
 interface OCRResult {
   id: string
@@ -42,12 +58,14 @@ export function OCRUploader({ onClose, onUploadComplete }: OCRUploaderProps) {
     (e: React.DragEvent) => {
       e.preventDefault()
       const files = Array.from(e.dataTransfer.files)
-      const imageFiles = files.filter((file) => file.type.startsWith("image/"))
+      const imageFiles = files.filter((file) =>
+        file.type.startsWith("image/")
+      )
       if (imageFiles.length > 0) {
         handleFileSelect(imageFiles[0])
       }
     },
-    [handleFileSelect],
+    [handleFileSelect]
   )
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -63,41 +81,55 @@ export function OCRUploader({ onClose, onUploadComplete }: OCRUploaderProps) {
     setIsProcessing(true)
 
     try {
-      // Mock OCR processing
-      await new Promise((resolve) => setTimeout(resolve, 3000))
+      const formData = new FormData()
+      formData.append("prescription", selectedFile)
 
-      const mockResult: OCRResult = {
-        id: Date.now().toString(),
-        image_url: previewUrl!,
-        ocr_text: `Dr. Sarah Johnson, MD
-Family Medicine Clinic
-123 Main Street, City, State 12345
+      const token = localStorage.getItem("accessToken") || ""
 
-Patient: John Smith
-DOB: 06/15/1985
-Date: ${new Date().toLocaleDateString()}
+      // Step 1: Upload prescription
+      const uploadRes = await fetch("http://localhost:8000/api/v1/prescriptions", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body: formData,
+      })
 
-Rx: Lisinopril
-Strength: 10mg
-Directions: Take one tablet by mouth once daily
-Quantity: 30 tablets
-Refills: 2
+      const uploadData = await uploadRes.json()
+      if (!uploadRes.ok) throw new Error(uploadData.error || "Upload failed")
 
-Dr. Sarah Johnson, MD
-License: MD123456`,
-        extracted_medications: [
-          {
-            name: "Lisinopril",
-            dosage: "10mg",
-            frequency: "Once daily",
+      const { prescription } = uploadData
+
+      // Step 2: Process OCR and extract medications
+      const processRes = await fetch(
+        `http://localhost:8000/api/v1/prescriptions/${prescription._id}/process`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
           },
-        ],
-        confidence: 0.95,
+        }
+      )
+
+      const processData = await processRes.json()
+      if (!processRes.ok) throw new Error(processData.error || "Processing failed")
+
+      const meds = processData.prescription.extracted_medications || []
+
+      // Combine results
+      const finalOCRResult: OCRResult = {
+        id: prescription._id,
+        image_url: prescription.image_url,
+        ocr_text: prescription.ocr_text || uploadData.ocrResult?.text || "",
+        extracted_medications: meds,
+        confidence: 0.95, // Optional: estimate or get from backend
       }
 
-      setOcrResult(mockResult)
+      setOcrResult(finalOCRResult)
     } catch (error) {
       console.error("OCR processing failed:", error)
+      alert("OCR processing failed. Please try again.")
     } finally {
       setIsProcessing(false)
     }
@@ -129,7 +161,9 @@ License: MD123456`,
             >
               <Upload className="mx-auto h-12 w-12 text-gray-400 mb-4" />
               <h3 className="text-lg font-medium text-foreground mb-2">Upload Prescription Image</h3>
-              <p className="text-muted-foreground mb-4">Drag and drop your prescription image here, or click to browse</p>
+              <p className="text-muted-foreground mb-4">
+                Drag and drop your prescription image here, or click to browse
+              </p>
               <input type="file" accept="image/*" onChange={handleFileChange} className="hidden" id="file-upload" />
               <label htmlFor="file-upload">
                 <Button asChild className="bg-teal-600 hover:bg-teal-700">
@@ -143,53 +177,40 @@ License: MD123456`,
           {selectedFile && !ocrResult && (
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Image Preview */}
-              <Card className="shadow-[0_0_15px_rgba(255,255,255,0.1)] hover:shadow-[0_0_25px_rgba(255,255,255,0.2)] transition-shadow">
-
-
+              <Card>
                 <CardHeader>
                   <CardTitle className="text-lg">Image Preview</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="space-y-4">
-                    <div className="relative">
-                      <img
-                        src={previewUrl! || "/placeholder.svg"}
-                        alt="Prescription preview"
-                        className="w-full h-64 object-contain border rounded-lg bg-background"
-                      />
-                    </div>
-                    <div className="flex items-center justify-between text-sm text-muted-foreground">
-                      <span>File: {selectedFile.name}</span>
-                      <span>Size: {(selectedFile.size / 1024 / 1024).toFixed(2)} MB</span>
-                    </div>
+                  <img
+                    src={previewUrl! || "/placeholder.svg"}
+                    alt="Prescription preview"
+                    className="w-full h-64 object-contain border rounded-lg bg-background"
+                  />
+                  <div className="flex items-center justify-between text-sm text-muted-foreground mt-2">
+                    <span>File: {selectedFile.name}</span>
+                    <span>Size: {(selectedFile.size / 1024 / 1024).toFixed(2)} MB</span>
                   </div>
                 </CardContent>
               </Card>
 
-              {/* Processing Controls */}
-              <Card className="shadow-[0_0_15px_rgba(255,255,255,0.1)] hover:shadow-[0_0_25px_rgba(255,255,255,0.2)] transition-shadow">
-
-
+              {/* OCR Controls */}
+              <Card>
                 <CardHeader>
                   <CardTitle className="text-lg">OCR Processing</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="space-y-4">
-                    <div className="text-sm text-muted-foreground">
-                      <p className="mb-2">Our AI will extract:</p>
-                      <ul className="list-disc list-inside space-y-1">
-                        <li>Medication names and dosages</li>
-                        <li>Frequency and instructions</li>
-                        <li>Doctor and pharmacy information</li>
-                        <li>Prescription dates and quantities</li>
-                      </ul>
-                    </div>
-
+                  <div className="space-y-4 text-sm text-muted-foreground">
+                    <p>The AI will extract:</p>
+                    <ul className="list-disc list-inside">
+                      <li>Medication names and dosages</li>
+                      <li>Frequencies and instructions</li>
+                      <li>Doctor & patient information</li>
+                    </ul>
                     {isProcessing ? (
                       <div className="text-center py-6">
                         <Loader2 className="h-8 w-8 animate-spin mx-auto text-teal-600 mb-3" />
-                        <p className="text-sm text-muted-foreground">Processing prescription image...</p>
-                        <p className="text-xs text-muted-foreground mt-1">This may take up to 30 seconds</p>
+                        <p>Processing prescription image...</p>
                       </div>
                     ) : (
                       <div className="flex gap-2">
@@ -216,7 +237,7 @@ License: MD123456`,
 
           {ocrResult && (
             <div className="space-y-6">
-              {/* Results Header */}
+              {/* OCR Result */}
               <div className="flex items-center justify-between">
                 <h3 className="text-lg font-medium">OCR Results</h3>
                 <Badge className="bg-green-100 text-green-800">
@@ -225,10 +246,8 @@ License: MD123456`,
               </div>
 
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {/* Extracted Text */}
-                <Card className="shadow-[0_0_15px_rgba(255,255,255,0.1)] hover:shadow-[0_0_25px_rgba(255,255,255,0.2)] transition-shadow">
-
-
+                {/* OCR Text */}
+                <Card>
                   <CardHeader>
                     <CardTitle className="text-lg flex items-center gap-2">
                       <FileText className="h-4 w-4" />
@@ -242,10 +261,8 @@ License: MD123456`,
                   </CardContent>
                 </Card>
 
-                {/* Identified Medications */}
-                <Card className="shadow-[0_0_15px_rgba(255,255,255,0.1)] hover:shadow-[0_0_25px_rgba(255,255,255,0.2)] transition-shadow">
-
-
+                {/* Extracted Medications */}
+                <Card>
                   <CardHeader>
                     <CardTitle className="text-lg flex items-center gap-2">
                       <Check className="h-4 w-4" />
@@ -267,7 +284,7 @@ License: MD123456`,
                 </Card>
               </div>
 
-              {/* Action Buttons */}
+              {/* Final Actions */}
               <div className="flex gap-3 justify-end">
                 <Button variant="outline" onClick={onClose}>
                   Cancel
