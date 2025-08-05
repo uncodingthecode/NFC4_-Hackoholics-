@@ -7,7 +7,8 @@ import {
   changePassword,
   getCurrentUser,
   updateUserDetails,
-  getFamilyMembers
+  getFamilyMembers,
+  
 } from "../controllers/user.controller.js";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
 

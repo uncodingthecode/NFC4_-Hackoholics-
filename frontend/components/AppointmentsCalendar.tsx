@@ -107,7 +107,7 @@ export function AppointmentsCalendar({ appointments }: AppointmentsCalendarProps
         {/* Calendar days */}
         {days.map((day, index) => {
           if (!day) {
-            return <div key={index} className="p-2 h-24" />
+            return <div key={`empty-${index}`} className="p-2 h-24" />
           }
 
           const date = new Date(currentDate.getFullYear(), currentDate.getMonth(), day)
@@ -119,8 +119,8 @@ export function AppointmentsCalendar({ appointments }: AppointmentsCalendarProps
 
           return (
             <div
-              key={day}
-              className={`p-2 h-24 border rounded-lg transition-colors hover:bg-background ${
+              key={`day-${currentDate.getFullYear()}-${currentDate.getMonth()}-${day}`}
+              className={`p-2 h-24 border rounded-lg transition-colors hover:bg-gray-50 ${
                 isToday ? "bg-teal-50 border-teal-200" : "border-gray-200"
               }`}
             >

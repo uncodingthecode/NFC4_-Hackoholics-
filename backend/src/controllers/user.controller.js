@@ -1,13 +1,10 @@
-import { User } from "../models/user.model.js";
-import { Family } from "../models/family.model.js";
+import  User  from "../models/user.model.js";
+import  Family  from "../models/family.model.js";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 
-// Helper function to generate tokens
 const generateTokens = async (userId) => {
   const user = await User.findById(userId);
-  if (!user) throw new Error("User not found");
-
   const accessToken = user.generateAccessToken();
   const refreshToken = user.generateRefreshToken();
 
@@ -17,53 +14,47 @@ const generateTokens = async (userId) => {
   return { accessToken, refreshToken };
 };
 
-// User Registration
 export const registerUser = async (req, res) => {
   try {
-    const { name, email, password, role, family_id } = req.body;
+    const { name, email, password, role, familyId } = req.body;
 
-    // Validation
-    if (!name || !email || !password || !role || !family_id) {
+    if (!name || !email || !password || !role) {
       return res.status(400).json({ error: "All fields are required" });
     }
 
-    // Check if user already exists
     const existedUser = await User.findOne({ email });
     if (existedUser) {
       return res.status(409).json({ error: "User already exists" });
     }
 
-    // Check if family exists
-    const familyExists = await Family.findById(family_id);
-    if (!familyExists) {
-      return res.status(404).json({ error: "Family not found" });
+    let family;
+    if (role === "head") {
+      family = await Family.create({ name: `${name}'s Family` });
+      familyId = family._id;
+    } else if (!familyId) {
+      return res.status(400).json({ error: "Family ID is required for members" });
     }
 
-    // Create user
     const user = await User.create({
       name,
       email,
-      password_hash: password, // Will be hashed by pre-save hook
+      password_hash: password,
       role,
-      family_id
+      family_id: familyId || family._id
     });
 
-    // Remove sensitive data from response
+    if (role === "head") {
+      await Family.findByIdAndUpdate(family._id, { head_id: user._id });
+    }
+
     const createdUser = await User.findById(user._id).select("-password_hash -refreshToken");
-
-    return res.status(201).json({
-      success: true,
-      data: createdUser,
-      message: "User registered successfully"
-    });
+    return res.status(201).json(createdUser);
 
   } catch (error) {
-    console.error("Registration error:", error);
-    return res.status(500).json({ error: error.message || "Registration failed" });
+    return res.status(500).json({ error: error.message });
   }
 };
 
-// User Login
 export const loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -83,7 +74,6 @@ export const loginUser = async (req, res) => {
     }
 
     const { accessToken, refreshToken } = await generateTokens(user._id);
-
     const loggedInUser = await User.findById(user._id).select("-password_hash -refreshToken");
 
     const options = {
@@ -96,22 +86,16 @@ export const loginUser = async (req, res) => {
       .cookie("accessToken", accessToken, options)
       .cookie("refreshToken", refreshToken, options)
       .json({
-        success: true,
-        data: {
-          user: loggedInUser,
-          accessToken,
-          refreshToken
-        },
-        message: "Login successful"
+        user: loggedInUser,
+        accessToken,
+        refreshToken
       });
 
   } catch (error) {
-    console.error("Login error:", error);
-    return res.status(500).json({ error: error.message || "Login failed" });
+    return res.status(500).json({ error: error.message });
   }
 };
 
-// User Logout
 export const logoutUser = async (req, res) => {
   try {
     await User.findByIdAndUpdate(
@@ -129,15 +113,13 @@ export const logoutUser = async (req, res) => {
       .status(200)
       .clearCookie("accessToken", options)
       .clearCookie("refreshToken", options)
-      .json({ success: true, message: "Logged out successfully" });
+      .json({ message: "Logged out successfully" });
 
   } catch (error) {
-    console.error("Logout error:", error);
-    return res.status(500).json({ error: error.message || "Logout failed" });
+    return res.status(500).json({ error: error.message });
   }
 };
 
-// Refresh Access Token
 export const refreshAccessToken = async (req, res) => {
   try {
     const incomingRefreshToken = req.cookies.refreshToken || req.body.refreshToken;
@@ -164,19 +146,22 @@ export const refreshAccessToken = async (req, res) => {
       .status(200)
       .cookie("accessToken", accessToken, options)
       .cookie("refreshToken", newRefreshToken, options)
-      .json({
-        success: true,
-        data: { accessToken, refreshToken: newRefreshToken },
-        message: "Access token refreshed"
-      });
+      .json({ accessToken, refreshToken: newRefreshToken });
 
   } catch (error) {
-    console.error("Refresh token error:", error);
-    return res.status(401).json({ error: error.message || "Invalid refresh token" });
+    return res.status(401).json({ error: error.message });
   }
 };
 
-// Change Password
+export const getCurrentUser = async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id).select("-password_hash -refreshToken");
+    return res.status(200).json(user);
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+};
+
 export const changePassword = async (req, res) => {
   try {
     const { oldPassword, newPassword } = req.body;
@@ -195,26 +180,13 @@ export const changePassword = async (req, res) => {
     user.password_hash = newPassword;
     await user.save({ validateBeforeSave: false });
 
-    return res.status(200).json({ success: true, message: "Password changed successfully" });
+    return res.status(200).json({ message: "Password changed successfully" });
 
   } catch (error) {
-    console.error("Change password error:", error);
-    return res.status(500).json({ error: error.message || "Password change failed" });
+    return res.status(500).json({ error: error.message });
   }
 };
 
-// Get Current User
-export const getCurrentUser = async (req, res) => {
-  try {
-    const user = await User.findById(req.user._id).select("-password_hash -refreshToken");
-    return res.status(200).json({ success: true, data: user });
-  } catch (error) {
-    console.error("Get current user error:", error);
-    return res.status(500).json({ error: error.message || "Failed to get user" });
-  }
-};
-
-// Update User Details
 export const updateUserDetails = async (req, res) => {
   try {
     const { name, email } = req.body;
@@ -229,27 +201,25 @@ export const updateUserDetails = async (req, res) => {
       { new: true }
     ).select("-password_hash -refreshToken");
 
-    return res.status(200).json({
-      success: true,
-      data: user,
-      message: "User details updated successfully"
-    });
+    return res.status(200).json(user);
 
   } catch (error) {
-    console.error("Update user error:", error);
-    return res.status(500).json({ error: error.message || "Update failed" });
+    return res.status(500).json({ error: error.message });
   }
 };
 
-// Get Family Members
 export const getFamilyMembers = async (req, res) => {
   try {
-    const familyId = req.user.family_id;
-    const members = await User.find({ family_id: familyId }).select("-password_hash -refreshToken");
+    const family = await Family.findById(req.user.family_id)
+      .populate('members', 'name email role');
 
-    return res.status(200).json({ success: true, data: members });
+    if (!family) {
+      return res.status(404).json({ error: "Family not found" });
+    }
+
+    return res.status(200).json(family.members);
+
   } catch (error) {
-    console.error("Get family members error:", error);
-    return res.status(500).json({ error: error.message || "Failed to get family members" });
+    return res.status(500).json({ error: error.message });
   }
 };
