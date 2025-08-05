@@ -5,7 +5,7 @@ import AgentAlert from "../src/models/agentAlert.model.js";
 import Notification from "../src/models/notification.model.js";
 import Family from "../src/models/family.model.js";
 import { getCurrentHHMM } from "../src/utils/timeUtils.js";
-import { sendEmergencyEmail } from "../src/utils/emailService.js";
+import { sendEmergencyEmail } from "../src/utils/mailer.js";
 
 // 🔐 Reusable
 export async function getAllUsers() {
