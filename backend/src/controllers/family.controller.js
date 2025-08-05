@@ -92,3 +92,109 @@ export const updateEmergencyContacts = async (req, res) => {
     return res.status(500).json({ error: error.message });
   }
 };
+
+// POST /api/v1/families/emergency-contacts
+export const addEmergencyContact = async (req, res) => {
+  try {
+    const { name, relation, email, phone } = req.body;
+
+    if (!name || !relation || !email) {
+      return res.status(400).json({ error: "Name, relation, and email are required" });
+    }
+
+    const family = await Family.findById(req.user.family_id);
+    if (!family) {
+      return res.status(404).json({ error: "Family not found" });
+    }
+
+    const newContact = {
+      name,
+      relation,
+      email,
+      phone: phone || ""
+    };
+
+    family.emergency_contacts.push(newContact);
+    await family.save();
+
+    return res.status(201).json({
+      message: "Emergency contact added successfully",
+      contact: newContact
+    });
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+};
+
+// PUT /api/v1/families/emergency-contacts/:contactId
+export const updateEmergencyContact = async (req, res) => {
+  try {
+    const { contactId } = req.params;
+    const { name, relation, email, phone } = req.body;
+
+    if (!name || !relation || !email) {
+      return res.status(400).json({ error: "Name, relation, and email are required" });
+    }
+
+    const family = await Family.findById(req.user.family_id);
+    if (!family) {
+      return res.status(404).json({ error: "Family not found" });
+    }
+
+    const contactIndex = family.emergency_contacts.findIndex(
+      contact => contact._id.toString() === contactId
+    );
+
+    if (contactIndex === -1) {
+      return res.status(404).json({ error: "Emergency contact not found" });
+    }
+
+    family.emergency_contacts[contactIndex] = {
+      ...family.emergency_contacts[contactIndex],
+      name,
+      relation,
+      email,
+      phone: phone || ""
+    };
+
+    await family.save();
+
+    return res.status(200).json({
+      message: "Emergency contact updated successfully",
+      contact: family.emergency_contacts[contactIndex]
+    });
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+};
+
+// DELETE /api/v1/families/emergency-contacts/:contactId
+export const deleteEmergencyContact = async (req, res) => {
+  try {
+    const { contactId } = req.params;
+
+    const family = await Family.findById(req.user.family_id);
+    if (!family) {
+      return res.status(404).json({ error: "Family not found" });
+    }
+
+    const contactIndex = family.emergency_contacts.findIndex(
+      contact => contact._id.toString() === contactId
+    );
+
+    if (contactIndex === -1) {
+      return res.status(404).json({ error: "Emergency contact not found" });
+    }
+
+    const deletedContact = family.emergency_contacts[contactIndex];
+    family.emergency_contacts.splice(contactIndex, 1);
+    await family.save();
+
+    return res.status(200).json({
+      message: "Emergency contact deleted successfully",
+      deletedContact
+    });
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+};

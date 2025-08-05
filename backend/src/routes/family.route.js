@@ -3,7 +3,10 @@ import {
   createFamily,
   getFamilyDetails,
   addFamilyMember,
-  updateEmergencyContacts
+  updateEmergencyContacts,
+  addEmergencyContact,
+  updateEmergencyContact,
+  deleteEmergencyContact
 } from "../controllers/family.controller.js";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
 
@@ -22,6 +25,12 @@ router.route("/members")
 
 // Emergency contacts
 router.route("/emergency-contacts")
-  .put(updateEmergencyContacts); // PUT /api/v1/families/emergency-contacts
+  .put(updateEmergencyContacts) // PUT /api/v1/families/emergency-contacts
+  .post(addEmergencyContact); // POST /api/v1/families/emergency-contacts
+
+// Individual emergency contact management
+router.route("/emergency-contacts/:contactId")
+  .put(updateEmergencyContact) // PUT /api/v1/families/emergency-contacts/:contactId
+  .delete(deleteEmergencyContact); // DELETE /api/v1/families/emergency-contacts/:contactId
 
 export default router;

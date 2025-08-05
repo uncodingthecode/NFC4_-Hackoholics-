@@ -2,6 +2,9 @@ import express from "express";
 import {
   getEmergencyInfo,
   shareEmergencyInfo,
+  mailEmergencyContacts,
+  shareSummary,
+  testEmergency,
 } from "../controllers/emergency.controller.js";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
 
@@ -21,5 +24,23 @@ router.get("/", getEmergencyInfo);
  * @desc Share emergency info via email with specified contact
  */
 router.post("/share/:contactId", shareEmergencyInfo);
+
+/**
+ * @route POST /api/emergency/mail-contacts
+ * @desc Mail emergency information to all contacts
+ */
+router.post("/mail-contacts", mailEmergencyContacts);
+
+/**
+ * @route POST /api/emergency/share-summary
+ * @desc Share health summary with emergency contacts
+ */
+router.post("/share-summary", shareSummary);
+
+/**
+ * @route GET /api/emergency/test
+ * @desc Test endpoint to check if emergency routes are working
+ */
+router.get("/test", testEmergency);
 
 export default router;

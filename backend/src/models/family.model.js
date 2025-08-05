@@ -21,6 +21,7 @@ const familySchema = new mongoose.Schema({
       name: String,
       relation: String,
       phone: String,
+      email: String,
     }
   ]
 }, { timestamps: true });

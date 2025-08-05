@@ -44,6 +44,7 @@ app.use('/api/v1/medications', medicationRouter);
 app.use('/api/v1/prescriptions', prescriptionRouter);
 app.use('/api/v1/vitals', vitalRouter);
 app.use('/api/v1/emergency', emergencyRouter);
+
 app.use('/api/v1/ai', aiAgentRouter);
 app.use('/api/v1/notifications', notificationRouter);
 app.use('/api/v1/agent', agentRoutes);

@@ -1,7 +1,5 @@
 "use client"
 
-import type React from "react"
-
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import {
@@ -16,6 +14,11 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useToast } from "@/hooks/use-toast"
+// Update the import to match the actual export from '@/lib/api'
+import { familyAPI } from "@/lib/api"
+
+// OR, if the correct named export is different, for example 'api':
+// import { api as familyAPI } from "@/lib/api"
 
 interface AddEmergencyContactModalProps {
   open: boolean
@@ -26,6 +29,7 @@ export function AddEmergencyContactModal({ open, onOpenChange }: AddEmergencyCon
   const [formData, setFormData] = useState({
     name: "",
     relation: "",
+    email: "",
     phone: "",
   })
   const [isLoading, setIsLoading] = useState(false)
@@ -36,25 +40,19 @@ export function AddEmergencyContactModal({ open, onOpenChange }: AddEmergencyCon
     setIsLoading(true)
 
     try {
-      // Mock implementation - in real app, this would call an API
-      await new Promise((resolve) => setTimeout(resolve, 1000))
-
+      await familyAPI.addEmergencyContact(formData) // ✅ call real backend
       toast({
         title: "Emergency contact added",
-        description: `${formData.name} has been added to your emergency contacts.`,
+        description: `${formData.name} was added to your emergency contacts.`,
       })
 
-      // Reset form
-      setFormData({
-        name: "",
-        relation: "",
-        phone: "",
-      })
+      // Reset
+      setFormData({ name: "", relation: "", email: "", phone: "" })
       onOpenChange(false)
     } catch (error) {
       toast({
         title: "Error",
-        description: "Failed to add emergency contact. Please try again.",
+        description: "Could not add contact. Try again.",
         variant: "destructive",
       })
     } finally {
@@ -71,7 +69,7 @@ export function AddEmergencyContactModal({ open, onOpenChange }: AddEmergencyCon
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>Add Emergency Contact</DialogTitle>
-          <DialogDescription>Add a new emergency contact for medical situations.</DialogDescription>
+          <DialogDescription>Provide emergency contact info (email used for alerts).</DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit}>
           <div className="grid gap-4 py-4">
@@ -81,11 +79,9 @@ export function AddEmergencyContactModal({ open, onOpenChange }: AddEmergencyCon
                 id="name"
                 value={formData.name}
                 onChange={(e) => updateFormData("name", e.target.value)}
-                placeholder="John Doe"
                 required
               />
             </div>
-
             <div className="grid gap-2">
               <Label htmlFor="relation">Relationship</Label>
               <Select value={formData.relation} onValueChange={(value) => updateFormData("relation", value)}>
@@ -103,16 +99,24 @@ export function AddEmergencyContactModal({ open, onOpenChange }: AddEmergencyCon
                 </SelectContent>
               </Select>
             </div>
-
             <div className="grid gap-2">
-              <Label htmlFor="phone">Phone Number</Label>
+              <Label htmlFor="email">Email Address</Label>
+              <Input
+                id="email"
+                type="email"
+                value={formData.email}
+                onChange={(e) => updateFormData("email", e.target.value)}
+                required
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="phone">Phone Number (Optional)</Label>
               <Input
                 id="phone"
                 type="tel"
                 value={formData.phone}
                 onChange={(e) => updateFormData("phone", e.target.value)}
-                placeholder="+1-555-0123"
-                required
+                placeholder="+1 (555) 123-4567"
               />
             </div>
           </div>
@@ -120,7 +124,7 @@ export function AddEmergencyContactModal({ open, onOpenChange }: AddEmergencyCon
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               Cancel
             </Button>
-            <Button type="submit" disabled={isLoading} className="bg-red-600 hover:bg-red-700">
+            <Button type="submit" disabled={isLoading}>
               {isLoading ? "Adding..." : "Add Contact"}
             </Button>
           </DialogFooter>
