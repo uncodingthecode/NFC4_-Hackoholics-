@@ -1,9 +1,8 @@
 import  Profile  from "../models/profile.model.js";
-import  User  from "../models/user.model.js";
 
 export const createOrUpdateProfile = async (req, res) => {
   try {
-    const { DOB, height, weight, gender, blood_group, allergies, existing_conditions } = req.body;
+    const { DOB, height, weight, gender, blood_group, allergies, existing_conditions, family_doctor_email } = req.body;
 
     const profileData = {
       user_id: req.user._id,
@@ -12,6 +11,7 @@ export const createOrUpdateProfile = async (req, res) => {
       weight,
       gender,
       blood_group,
+      family_doctor_email,
       allergies,
       existing_conditions
     };
@@ -34,7 +34,22 @@ export const getProfile = async (req, res) => {
       .populate('medications');
 
     if (!profile) {
-      return res.status(404).json({ error: "Profile not found" });
+      // Return empty profile structure instead of error
+      return res.status(200).json({
+        _id: null,
+        user_id: req.user._id,
+        DOB: null,
+        height: null,
+        weight: null,
+        gender: null,
+        blood_group: null,
+        family_doctor_email: [],
+        allergies: [],
+        existing_conditions: [],
+        medications: [],
+        createdAt: null,
+        updatedAt: null
+      });
     }
 
     return res.status(200).json(profile);
