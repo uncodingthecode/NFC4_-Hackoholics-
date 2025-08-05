@@ -1,7 +1,7 @@
 // routes/ocr.routes.js
 import express from "express";
 import upload from "../middlewares/upload.middleware.js";
-import { processOCR } from "../controllers/ocr.controllers.js";
+import { processOCR } from "../controllers/ocr.controller.js";
 
 const router = express.Router();
 
