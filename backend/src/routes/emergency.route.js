@@ -7,12 +7,19 @@ import { verifyJWT } from "../middlewares/auth.middleware.js";
 
 const router = express.Router();
 
+// Apply JWT verification to all emergency routes
 router.use(verifyJWT);
 
-router.route("/")
-  .get(getEmergencyInfo);
+/**
+ * @route GET /api/emergency/
+ * @desc Get emergency medical info of the logged-in user
+ */
+router.get("/", getEmergencyInfo);
 
-router.route("/share/:contactId")
-  .post(shareEmergencyInfo);
+/**
+ * @route POST /api/emergency/share/:contactId
+ * @desc Share emergency info via email with specified contact
+ */
+router.post("/share/:contactId", shareEmergencyInfo);
 
 export default router;
