@@ -28,23 +28,79 @@ export const registerUser = async (req, res) => {
     }
 
     let family;
+    let finalFamilyId = familyId;
+    let user;
+    
     if (role === "head") {
-      family = await Family.create({ name: `${name}'s Family` });
-      familyId = family._id;
-    } else if (!familyId) {
-      return res.status(400).json({ error: "Family ID is required for members" });
-    }
-
-    const user = await User.create({
-      name,
-      email,
-      password_hash: password,
-      role,
-      family_id: familyId || family._id
-    });
-
-    if (role === "head") {
-      await Family.findByIdAndUpdate(family._id, { head_id: user._id });
+      if (familyId) {
+        // If familyId is provided, validate it exists
+        family = await Family.findById(familyId);
+        if (!family) {
+          return res.status(404).json({ error: "Family not found" });
+        }
+        // Check if family already has a head
+        if (family.head_id) {
+          return res.status(400).json({ error: "Family already has a head" });
+        }
+        finalFamilyId = familyId;
+        // Create user with family_id
+        user = await User.create({
+          name,
+          email,
+          password_hash: password,
+          role,
+          family_id: finalFamilyId
+        });
+        // Set this user as head and member
+        await Family.findByIdAndUpdate(
+          family._id, 
+          { 
+            head_id: user._id,
+            $addToSet: { members: user._id }
+          }
+        );
+      } else {
+        // Create user first (without family_id)
+        user = await User.create({
+          name,
+          email,
+          password_hash: password,
+          role
+        });
+        // Create new family with head_id set to user._id
+        family = await Family.create({
+          name: `${name}'s Family`,
+          head_id: user._id,
+          members: [user._id]
+        });
+        finalFamilyId = family._id;
+        // Update user with family_id
+        user.family_id = finalFamilyId;
+        await user.save();
+      }
+    } else if (role === "member") {
+      // For member users, familyId is required
+      if (!familyId) {
+        return res.status(400).json({ error: "Family ID is required for members" });
+      }
+      family = await Family.findById(familyId);
+      if (!family) {
+        return res.status(404).json({ error: "Family not found" });
+      }
+      finalFamilyId = familyId;
+      // Create user with family_id
+      user = await User.create({
+        name,
+        email,
+        password_hash: password,
+        role,
+        family_id: finalFamilyId
+      });
+      // Add member to family
+      await Family.findByIdAndUpdate(
+        family._id,
+        { $addToSet: { members: user._id } }
+      );
     }
 
     const createdUser = await User.findById(user._id).select("-password_hash -refreshToken");
@@ -210,6 +266,11 @@ export const updateUserDetails = async (req, res) => {
 
 export const getFamilyMembers = async (req, res) => {
   try {
+    // Check if user has a family_id
+    if (!req.user.family_id) {
+      return res.status(404).json({ error: "No family associated with this user" });
+    }
+
     const family = await Family.findById(req.user.family_id)
       .populate('members', 'name email role');
 

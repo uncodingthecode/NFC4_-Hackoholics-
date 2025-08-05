@@ -1,9 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
-import rateLimit from 'express-rate-limit';
 import helmet from 'helmet';
-import mongoSanitize from 'express-mongo-sanitize';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
@@ -23,9 +21,6 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
-
-app.use(helmet()); // Security headers
-app.use(mongoSanitize()); // Prevent NoSQL injection
 app.use(cors({
   origin: process.env.CORS_ORIGIN || 'http://localhost:3000',
   credentials: true,

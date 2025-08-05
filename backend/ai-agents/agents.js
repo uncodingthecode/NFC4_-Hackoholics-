@@ -1,16 +1,20 @@
-import db from "../src/db/mongoClient.js";
+import User from "../src/models/user.model.js";
+import Vital from "../src/models/vital.model.js";
+import Medication from "../src/models/medication.model.js";
+import AgentAlert from "../src/models/agentAlert.model.js";
+import Notification from "../src/models/notification.model.js";
 import { getCurrentHHMM } from "../src/utils/timeUtils.js";
 
 // 🔐 Reusable
 export async function getAllUsers() {
-  return await db.collection("users").find({}).toArray();
+  return await User.find({});
 }
 
 // 🤖 Run agent logic per user
 export async function runAgentForUser(user) {
   const userId = user._id;
-  const vitals = await db.collection("vitals").find({ user_id: userId }).sort({ timestamp: -1 }).toArray();
-  const medications = await db.collection("medication").find({ user_id: userId }).toArray();
+  const vitals = await Vital.find({ user_id: userId }).sort({ timestamp: -1 });
+  const medications = await Medication.find({ user_id: userId });
   const now = getCurrentHHMM();
 
   console.log(`👤 Running AI Agent for ${user.name} (${userId})`);
@@ -40,7 +44,7 @@ export async function runAgentForUser(user) {
 
 // ✉ Save alert
 async function saveAlert(userId, type, message, severity) {
-  await db.collection("agent_alerts").insertOne({
+  await AgentAlert.create({
     user_id: userId,
     timestamp: new Date(),
     type,
@@ -53,7 +57,7 @@ async function saveAlert(userId, type, message, severity) {
 
 // ✉ Save notification
 async function saveNotification(userId, type, message) {
-  await db.collection("notifications").insertOne({
+  await Notification.create({
     user_id: userId,
     type,
     message,
