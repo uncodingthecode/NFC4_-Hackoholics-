@@ -10,7 +10,7 @@ import { useState } from "react"
 import Link from "next/link"
 
 export default function DashboardPage() {
-  const { family, medications, alerts, appointments, vitals } = useHealthcare()
+  const { family, medications, alerts, appointments, vitals, loading } = useHealthcare()
   const [showAddMemberModal, setShowAddMemberModal] = useState(false)
 
   const todaysMeds = medications.filter((med) => {
@@ -25,6 +25,18 @@ export default function DashboardPage() {
   const criticalAlerts = alerts.filter((alert) => alert.severity === "high" && !alert.acknowledged)
 
   const recentVitals = vitals.slice(-1)[0]
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-96">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal-600 mx-auto mb-4"></div>
+          <h3 className="text-lg font-medium text-foreground mb-2">Loading Dashboard</h3>
+          <p className="text-muted-foreground">Please wait while we load your health data.</p>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="space-y-6">
@@ -48,8 +60,8 @@ export default function DashboardPage() {
             <Users className="h-4 w-4 text-teal-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{family?.members.length || 0}</div>
-            <p className="text-xs text-muted-foreground">Active members in {family?.name}</p>
+            <div className="text-2xl font-bold">{family?.members?.length || 0}</div>
+            <p className="text-xs text-muted-foreground">Active members in {family?.name || 'Family'}</p>
           </CardContent>
         </Card>
 

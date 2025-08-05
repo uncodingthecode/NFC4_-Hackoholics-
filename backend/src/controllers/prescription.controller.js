@@ -1,7 +1,7 @@
 import  Prescription  from "../models/prescription.model.js";
 import  Medication  from "../models/medication.model.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
-import { processOCR } from "./ocr.controller.js";
+import { extractMedicationsFromPrescription } from "../utils/geminiService.js";
 import fs from 'fs';
 import { createWorker } from 'tesseract.js';
 import path from 'path';
@@ -9,90 +9,80 @@ import gtts from 'gtts';
 
 export const uploadPrescription = async (req, res) => {
   try {
+    console.log("Upload prescription called");
+    console.log("Request file:", req.file);
+    console.log("Request user:", req.user);
+
     if (!req.file) {
+      console.log("No file provided");
       return res.status(400).json({ error: "Prescription image is required" });
     }
 
+    if (!req.user || !req.user._id) {
+      console.log("No user found in request");
+      return res.status(401).json({ error: "User not authenticated" });
+    }
+
     // Step 1: Upload to Cloudinary for storage
+    console.log("Uploading to Cloudinary...");
     const result = await uploadOnCloudinary(req.file.path);
     if (!result.url) {
+      console.log("Cloudinary upload failed");
       return res.status(500).json({ error: "Failed to upload prescription" });
     }
+    console.log("Cloudinary upload successful:", result.url);
 
-    let ocrText = "";
-    let audioUrl = null;
+    // Step 2: Run OCR on the uploaded image
+    const worker = await createWorker("eng");
+    const { data: { text: ocrText } } = await worker.recognize(req.file.path);
+    await worker.terminate();
 
-    // Step 2: Process OCR directly
-    const imagePath = req.file.path;
-    console.log("Processing OCR for file:", imagePath);
-    console.log("File exists:", fs.existsSync(imagePath));
-    
-    if (!fs.existsSync(imagePath)) {
-      console.log("File not found, skipping OCR");
-    } else {
-      console.log("File size:", fs.statSync(imagePath).size, "bytes");
-      
-      const worker = await createWorker("eng");
-      
-      try {
-        const { data: { text } } = await worker.recognize(imagePath);
-        await worker.terminate();
-        
-        console.log("OCR raw text:", text);
-        console.log("OCR text length:", text ? text.length : 0);
-        
-        if (text && text.trim()) {
-          ocrText = text.trim();
-          
-          // Generate audio if text exists
-          const audioDir = path.join(__dirname, "..", "tts_output");
-          fs.mkdirSync(audioDir, { recursive: true });
-          
-          const audioFile = `${Date.now()}.mp3`;
-          const audioPath = path.join(audioDir, audioFile);
-          
-          const tts = new gtts(ocrText, "en");
-          await new Promise((resolve, reject) => {
-            tts.save(audioPath, (err) => {
-              if (err) {
-                reject(err);
-              } else {
-                audioUrl = `/audio/${audioFile}`;
-                resolve();
-              }
-            });
-          });
-        } else {
-          console.log("OCR returned empty or null text");
-        }
-      } catch (ocrError) {
-        console.error("OCR processing error:", ocrError);
-        // Continue without OCR text if it fails
-      }
-    }
-
-    // Step 3: Create prescription record
+    // Step 3: Create prescription record with OCR text
     const prescription = await Prescription.create({
       user_id: req.user._id,
       image_url: result.url,
       ocr_text: ocrText,
-      audio_url: audioUrl
+      status: "processing",
+      extracted_medications: []
     });
 
-    // Keep the local file for manual cleanup
-    console.log("Local file kept for manual cleanup:", req.file.path);
+    // Step 4: Run Gemini extraction
+    const extractedMedications = await extractMedicationsFromPrescription(ocrText);
+    prescription.extracted_medications = extractedMedications;
+    prescription.status = "completed";
+    await prescription.save();
+
+    // Step 5: Save medications to Medication table
+    if (extractedMedications && extractedMedications.length > 0) {
+      await Medication.insertMany(
+        extractedMedications.map(med => ({
+          user_id: req.user._id,
+          medicine_name: med.medicine_name || med.name,
+          dosage: med.dosage,
+          frequency: med.frequency,
+          timing: med.timing || [],
+          start_date: new Date(),
+          end_date: new Date(),
+          stock_count: 0,
+          refill_alert_threshold: 10,
+          prescription_id: prescription._id
+        }))
+      );
+    }
 
     return res.status(201).json({
       success: true,
       prescription,
       ocrResult: {
         text: ocrText,
-        audioUrl: audioUrl
-      }
+        audioUrl: null
+      },
+      extractedMedications
     });
 
   } catch (error) {
     console.error("Upload prescription error:", error);
+    console.error("Error stack:", error.stack);
     return res.status(500).json({ 
       error: error.message,
       stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
@@ -222,6 +212,71 @@ export const createMedicationsFromPrescription = async (req, res) => {
   } catch (error) {
     return res.status(500).json({ 
       error: error.message,
+    });
+  }
+};
+
+export const processPrescriptionWithGemini = async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    const prescription = await Prescription.findOne({ 
+      _id: id, 
+      user_id: req.user._id 
+    });
+
+    if (!prescription) {
+      return res.status(404).json({ error: "Prescription not found" });
+    }
+
+    if (!prescription.ocr_text) {
+      return res.status(400).json({ 
+        error: "OCR text not available. Please ensure the prescription was uploaded successfully." 
+      });
+    }
+
+    // Use Gemini to extract medications from OCR text
+    const extractedMedications = await extractMedicationsFromPrescription(prescription.ocr_text);
+
+    // Update prescription with extracted medications
+    prescription.extracted_medications = extractedMedications;
+    prescription.status = "completed";
+    await prescription.save();
+
+    return res.status(200).json({
+      success: true,
+      prescription,
+      extractedCount: extractedMedications.length,
+      extractedMedications
+    });
+
+  } catch (error) {
+    console.error("Gemini processing error:", error);
+    return res.status(500).json({ 
+      error: error.message,
+      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+    });
+  }
+};
+
+export const getPrescriptions = async (req, res) => {
+  try {
+    const prescriptions = await Prescription.find({ 
+      user_id: req.user._id 
+    })
+    .populate('extracted_medications.linked_medication_id')
+    .sort({ upload_time: -1 }); // Most recent first
+
+    return res.status(200).json({
+      success: true,
+      prescriptions
+    });
+
+  } catch (error) {
+    console.error("Get prescriptions error:", error);
+    return res.status(500).json({ 
+      error: error.message,
+      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
     });
   }
 };

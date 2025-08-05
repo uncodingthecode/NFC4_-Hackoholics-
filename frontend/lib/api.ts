@@ -21,7 +21,6 @@ class ApiClient {
     
     // Add default headers
     const headers: Record<string, string> = {
-      'Content-Type': 'application/json',
       ...(options.headers as Record<string, string> || {}),
     }
 
@@ -29,6 +28,11 @@ class ApiClient {
     const token = localStorage.getItem('accessToken')
     if (token) {
       headers.Authorization = `Bearer ${token}`
+    }
+
+    // Don't set Content-Type for FormData, let browser set it with boundary
+    if (!(options.body instanceof FormData)) {
+      headers['Content-Type'] = 'application/json'
     }
 
     try {
@@ -127,6 +131,75 @@ class ApiClient {
   // Generic DELETE request
   async delete<T>(endpoint: string): Promise<ApiResponse<T>> {
     return this.request<T>(endpoint, { method: 'DELETE' })
+  }
+
+  // Profile methods
+  async getProfile() {
+    return this.request('/profile')
+  }
+
+  async updateProfile(profileData: {
+    DOB?: string
+    height?: number
+    weight?: number
+    gender?: 'Male' | 'Female' | 'Other'
+    blood_group?: string
+    family_doctor_email?: string[]
+    allergies?: string[]
+    existing_conditions?: string[]
+  }) {
+    return this.request('/profile', {
+      method: 'POST',
+      body: JSON.stringify(profileData),
+    })
+  }
+
+  async addFamilyDoctor(email: string) {
+    return this.request('/profile/family-doctor', {
+      method: 'POST',
+      body: JSON.stringify({ email }),
+    })
+  }
+
+  // Family methods
+  async getFamily() {
+    return this.request('/families')
+  }
+
+  // Medication methods
+  async getMedications() {
+    return this.request('/medications')
+  }
+
+  // Vital methods
+  async getVitals() {
+    return this.request('/vitals')
+  }
+
+  // Notification methods
+  async getNotifications() {
+    return this.request('/notifications')
+  }
+
+  // Prescription methods
+  async uploadPrescription(formData: FormData) {
+    return this.request('/prescriptions', {
+      method: 'POST',
+      body: formData,
+      headers: {
+        // Don't set Content-Type for FormData, let browser set it with boundary
+      },
+    })
+  }
+
+  async getPrescriptions() {
+    return this.request('/prescriptions')
+  }
+
+  async processPrescriptionWithGemini(prescriptionId: string) {
+    return this.request(`/prescriptions/${prescriptionId}/process-gemini`, {
+      method: 'POST',
+    })
   }
 }
 
