@@ -26,7 +26,8 @@ interface AddFamilyMemberModalProps {
 export function AddFamilyMemberModal({ open, onOpenChange }: AddFamilyMemberModalProps) {
   const [name, setName] = useState("")
   const [email, setEmail] = useState("")
-  const [role, setRole] = useState<"head" | "member">("member")
+  const [password, setPassword] = useState("")
+  const [relation, setRelation] = useState("other")
   const [isLoading, setIsLoading] = useState(false)
   const { addFamilyMember } = useHealthcare()
   const { toast } = useToast()
@@ -36,26 +37,30 @@ export function AddFamilyMemberModal({ open, onOpenChange }: AddFamilyMemberModa
     setIsLoading(true)
 
     try {
+      // Send all required fields to create new family member
       await addFamilyMember({
         name,
         email,
-        role,
+        password,
+        relation,
       })
 
       toast({
-        title: "Family member added",
-        description: `${name} has been successfully added to your family.`,
+        title: "Family member created",
+        description: `${name} has been successfully added to your family. They can now sign in using their email and password.`,
       })
 
       // Reset form
       setName("")
       setEmail("")
-      setRole("member")
+      setPassword("")
+      setRelation("other")
       onOpenChange(false)
-    } catch (error) {
+    } catch (error: any) {
+      console.error('Error adding family member:', error)
       toast({
         title: "Error",
-        description: "Failed to add family member. Please try again.",
+        description: error.message || "Failed to create family member. Please try again.",
         variant: "destructive",
       })
     } finally {
@@ -68,12 +73,14 @@ export function AddFamilyMemberModal({ open, onOpenChange }: AddFamilyMemberModa
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>Add Family Member</DialogTitle>
-          <DialogDescription>Add a new member to your family healthcare dashboard.</DialogDescription>
+          <DialogDescription>
+            Create a new family member account. They can sign in later using their email and password.
+          </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit}>
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
-              <Label htmlFor="name">Full Name</Label>
+              <Label htmlFor="name">Full Name *</Label>
               <Input
                 id="name"
                 value={name}
@@ -83,7 +90,7 @@ export function AddFamilyMemberModal({ open, onOpenChange }: AddFamilyMemberModa
               />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email">Email *</Label>
               <Input
                 id="email"
                 type="email"
@@ -94,14 +101,31 @@ export function AddFamilyMemberModal({ open, onOpenChange }: AddFamilyMemberModa
               />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="role">Role</Label>
-              <Select value={role} onValueChange={(value: "head" | "member") => setRole(value)}>
+              <Label htmlFor="password">Password *</Label>
+              <Input
+                id="password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Enter password"
+                required
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="relation">Relation *</Label>
+              <Select value={relation} onValueChange={(value) => setRelation(value)}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Select role" />
+                  <SelectValue placeholder="Select relation" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="member">Member</SelectItem>
-                  <SelectItem value="head">Head</SelectItem>
+                  <SelectItem value="son">Son</SelectItem>
+                  <SelectItem value="daughter">Daughter</SelectItem>
+                  <SelectItem value="spouse">Spouse</SelectItem>
+                  <SelectItem value="father">Father</SelectItem>
+                  <SelectItem value="mother">Mother</SelectItem>
+                  <SelectItem value="grandparent">Grandparent</SelectItem>
+                  <SelectItem value="sibling">Sibling</SelectItem>
+                  <SelectItem value="other">Other</SelectItem>
                 </SelectContent>
               </Select>
             </div>

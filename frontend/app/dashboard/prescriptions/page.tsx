@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
 import { FileText, Upload, Search, Eye, Camera, Check } from "lucide-react"
 import { OCRUploader } from "@/components/OCRUploader"
+import { useHealthcare } from "@/context/healthcare-context"
 
 interface Prescription {
   _id: string
@@ -24,41 +25,20 @@ interface Prescription {
 }
 
 export default function PrescriptionsPage() {
+  const { prescriptions, loading, getPrescriptions } = useHealthcare()
   const [searchTerm, setSearchTerm] = useState("")
   const [showUploader, setShowUploader] = useState(false)
-
-  // Mock prescriptions data
-  const [prescriptions] = useState<Prescription[]>([
-    {
-      _id: "1",
-      user_id: "user1",
-      upload_time: new Date("2024-01-15"),
-      image_url: "/prescription-document.png",
-      ocr_text: "Dr. Johnson\nPatient: John Smith\nRx: Lisinopril 10mg\nTake once daily\nQty: 30\nRefills: 2",
-      extracted_medications: [
-        {
-          name: "Lisinopril",
-          dosage: "10mg",
-          frequency: "Once daily",
-          linked_medication_id: "med1",
-        },
-      ],
-      status: "completed",
-    },
-    {
-      _id: "2",
-      user_id: "user1",
-      upload_time: new Date("2024-01-10"),
-      image_url: "/medical-prescription.png",
-      ocr_text: "Processing...",
-      extracted_medications: [],
-      status: "processing",
-    },
-  ])
 
   const filteredPrescriptions = prescriptions.filter((prescription) =>
     prescription.ocr_text.toLowerCase().includes(searchTerm.toLowerCase()),
   )
+
+  const handleUploadComplete = async (result: any) => {
+    console.log("Upload completed:", result)
+    setShowUploader(false)
+    // Refresh prescriptions to get the latest data
+    await getPrescriptions()
+  }
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -71,6 +51,18 @@ export default function PrescriptionsPage() {
       default:
         return <Badge variant="secondary">Unknown</Badge>
     }
+  }
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-96">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal-600 mx-auto mb-4"></div>
+          <h3 className="text-lg font-medium text-foreground mb-2">Loading Prescriptions</h3>
+          <p className="text-muted-foreground">Please wait while we load your prescription data.</p>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -181,7 +173,7 @@ export default function PrescriptionsPage() {
                   </div>
 
                   {/* Extracted Medications */}
-                  {prescription.extracted_medications.length > 0 && (
+                  {prescription.extracted_medications?.length > 0 && (
                     <div>
                       <h4 className="font-medium text-foreground mb-2">Extracted Medications:</h4>
                       <div className="space-y-2">
@@ -244,10 +236,7 @@ export default function PrescriptionsPage() {
       {showUploader && (
         <OCRUploader
           onClose={() => setShowUploader(false)}
-          onUploadComplete={(result) => {
-            console.log("Upload completed:", result)
-            setShowUploader(false)
-          }}
+          onUploadComplete={handleUploadComplete}
         />
       )}
     </div>

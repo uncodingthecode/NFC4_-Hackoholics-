@@ -12,16 +12,12 @@ import { useToast } from "@/hooks/use-toast"
 import { User, Edit, Save, X, Plus, Trash2 } from "lucide-react"
 import { ProfileCard } from "@/components/ProfileCard"
 
-interface ProfilePageProps {
-  params: {
-    userId: string
-  }
-}
-
-export default function ProfilePage({ params }: ProfilePageProps) {
-  const { user, profiles, updateProfile } = useHealthcare()
+export default function ProfilePage() {
+  const { user, profile, getProfile, updateProfile, addFamilyDoctor } = useHealthcare()
   const { toast } = useToast()
   const [isEditing, setIsEditing] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
+  const [isInitialized, setIsInitialized] = useState(false)
   const [currentProfile, setCurrentProfile] = useState({
     DOB: "",
     height: "",
@@ -36,80 +32,179 @@ export default function ProfilePage({ params }: ProfilePageProps) {
   const [newCondition, setNewCondition] = useState("")
   const [newDoctorEmail, setNewDoctorEmail] = useState("")
 
-  const profile = profiles.find((p) => p.user_id === params.userId)
-  const isOwnProfile = user?._id === params.userId
-  const canEdit = user?.role === "head" || isOwnProfile
-
+  // Load profile data when component mounts
   useEffect(() => {
-    if (profile) {
-      setCurrentProfile({
-        DOB: profile.DOB.toISOString().split("T")[0],
-        height: profile.height.toString(),
-        weight: profile.weight.toString(),
-        gender: profile.gender,
-        blood_group: profile.blood_group,
-        family_doctor_email: [...profile.family_doctor_email],
-        allergies: [...profile.allergies],
-        existing_conditions: [...profile.existing_conditions],
-      })
+    if (user) {
+      getProfile()
     }
-  }, [profile])
+  }, [user, getProfile])
+
+  // Update form when profile data changes (only on initial load)
+  useEffect(() => {
+    if (profile && !isInitialized) {
+      setCurrentProfile({
+        DOB: profile.DOB ? new Date(profile.DOB).toISOString().split("T")[0] : "",
+        height: profile.height?.toString() || "",
+        weight: profile.weight?.toString() || "",
+        gender: profile.gender || "Male",
+        blood_group: profile.blood_group || "",
+        family_doctor_email: [...(profile.family_doctor_email || [])], // Use profile data
+        allergies: [...(profile.allergies || [])],
+        existing_conditions: [...(profile.existing_conditions || [])],
+      })
+      setIsInitialized(true)
+    }
+  }, [profile, isInitialized])
 
   const handleSave = async () => {
+    setIsLoading(true)
     try {
-      await updateProfile(params.userId, {
-        DOB: new Date(currentProfile.DOB),
-        height: Number.parseFloat(currentProfile.height),
-        weight: Number.parseFloat(currentProfile.weight),
+      await updateProfile(user?._id || "", {
+        DOB: currentProfile.DOB ? new Date(currentProfile.DOB) : null,
+        height: currentProfile.height ? Number.parseFloat(currentProfile.height) : null,
+        weight: currentProfile.weight ? Number.parseFloat(currentProfile.weight) : null,
         gender: currentProfile.gender,
         blood_group: currentProfile.blood_group,
-        family_doctor_email: currentProfile.family_doctor_email,
+        family_doctor_email: profile?.family_doctor_email || [], // Use profile data instead of currentProfile
         allergies: currentProfile.allergies,
         existing_conditions: currentProfile.existing_conditions,
       })
+
+      // Refresh profile data after successful update
+      await getProfile()
+      setIsInitialized(false) // Reset to allow form to update with new data
 
       toast({
         title: "Profile updated",
         description: "Health profile has been successfully updated.",
       })
       setIsEditing(false)
-    } catch (error) {
+    } catch (error: any) {
       toast({
         title: "Error",
-        description: "Failed to update profile. Please try again.",
+        description: error.message || "Failed to update profile. Please try again.",
         variant: "destructive",
       })
+    } finally {
+      setIsLoading(false)
     }
   }
 
-  const addItem = (type: "allergies" | "existing_conditions" | "family_doctor_email", value: string) => {
+  const addItem = async (type: "allergies" | "existing_conditions" | "family_doctor_email", value: string) => {
     if (!value.trim()) return
 
-    setCurrentProfile((prev) => ({
-      ...prev,
-      [type]: [...prev[type], value.trim()],
-    }))
+    if (type === "family_doctor_email") {
+      try {
+        await addFamilyDoctor(value.trim())
+        setNewDoctorEmail("")
+        // Refresh profile data to get the updated family doctors
+        await getProfile()
+        toast({
+          title: "Family doctor added",
+          description: "Family doctor email has been successfully added to your profile.",
+        })
+      } catch (error: any) {
+        toast({
+          title: "Error",
+          description: error.message || "Failed to add family doctor. Please try again.",
+          variant: "destructive",
+        })
+      }
+    } else {
+      setCurrentProfile((prev) => ({
+        ...prev,
+        [type]: [...prev[type], value.trim()],
+      }))
 
-    // Reset input
-    if (type === "allergies") setNewAllergy("")
-    if (type === "existing_conditions") setNewCondition("")
-    if (type === "family_doctor_email") setNewDoctorEmail("")
+      // Reset input
+      if (type === "allergies") setNewAllergy("")
+      if (type === "existing_conditions") setNewCondition("")
+    }
   }
 
-  const removeItem = (type: "allergies" | "existing_conditions" | "family_doctor_email", index: number) => {
-    setCurrentProfile((prev) => ({
-      ...prev,
-      [type]: prev[type].filter((_, i) => i !== index),
-    }))
+  const removeItem = async (type: "allergies" | "existing_conditions" | "family_doctor_email", index: number) => {
+    if (type === "family_doctor_email") {
+      // For family doctors, we need to update the profile with the filtered list
+      const updatedEmails = profile.family_doctor_email?.filter((_, i) => i !== index) || []
+      try {
+        await updateProfile(user?._id || "", {
+          family_doctor_email: updatedEmails,
+        })
+        // Refresh profile data to get the updated family doctors
+        await getProfile()
+        toast({
+          title: "Family doctor removed",
+          description: "Family doctor has been successfully removed from your profile.",
+        })
+      } catch (error: any) {
+        toast({
+          title: "Error",
+          description: error.message || "Failed to remove family doctor. Please try again.",
+          variant: "destructive",
+        })
+      }
+    } else {
+      setCurrentProfile((prev) => ({
+        ...prev,
+        [type]: prev[type].filter((_, i) => i !== index),
+      }))
+    }
   }
 
-  if (profile) {
+  const handleEditClick = () => {
+    // Ensure form is initialized with current profile data
+    if (profile) {
+      setCurrentProfile({
+        DOB: profile.DOB ? new Date(profile.DOB).toISOString().split("T")[0] : "",
+        height: profile.height?.toString() || "",
+        weight: profile.weight?.toString() || "",
+        gender: profile.gender || "Male",
+        blood_group: profile.blood_group || "",
+        family_doctor_email: [...(profile.family_doctor_email || [])], // Use profile data
+        allergies: [...(profile.allergies || [])],
+        existing_conditions: [...(profile.existing_conditions || [])],
+      })
+    }
+    setIsEditing(true)
+  }
+
+  const handleCancelClick = () => {
+    // Reset form to original profile data
+    if (profile) {
+      setCurrentProfile({
+        DOB: profile.DOB ? new Date(profile.DOB).toISOString().split("T")[0] : "",
+        height: profile.height?.toString() || "",
+        weight: profile.weight?.toString() || "",
+        gender: profile.gender || "Male",
+        blood_group: profile.blood_group || "",
+        family_doctor_email: [...(profile.family_doctor_email || [])], // Use profile data
+        allergies: [...(profile.allergies || [])],
+        existing_conditions: [...(profile.existing_conditions || [])],
+      })
+    }
+    setIsEditing(false)
+  }
+
+  if (!user) {
     return (
       <div className="flex items-center justify-center h-96">
         <div className="text-center">
           <User className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-          <h3 className="text-lg font-medium text-foreground mb-2">Profile not found</h3>
-          <p className="text-muted-foreground">The requested profile could not be found.</p>
+          <h3 className="text-lg font-medium text-foreground mb-2">User not logged in</h3>
+          <p className="text-muted-foreground">Please log in to view your profile.</p>
+        </div>
+      </div>
+    )
+  }
+
+  // Show loading state while profile is being fetched
+  if (!profile) {
+    return (
+      <div className="flex items-center justify-center h-96">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal-600 mx-auto mb-4"></div>
+          <h3 className="text-lg font-medium text-foreground mb-2">Loading Profile</h3>
+          <p className="text-muted-foreground">Please wait while we load your health profile.</p>
         </div>
       </div>
     )
@@ -120,36 +215,36 @@ export default function ProfilePage({ params }: ProfilePageProps) {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">Health Profile</h1>
+          <h1 className="text-3xl font-bold text-foreground">
+            Hello {user?.name || 'User'}! 👋
+          </h1>
           <p className="text-muted-foreground">
-            {isOwnProfile ? "Manage your health information" : "View family member's health profile"}
+            Manage your health information and medical details
           </p>
         </div>
-        {canEdit && (
-          <div className="flex gap-2">
-            {isEditing ? (
-              <>
-                <Button variant="outline" onClick={() => setIsEditing(false)}>
-                  <X className="mr-2 h-4 w-4" />
-                  Cancel
-                </Button>
-                <Button onClick={handleSave} className="bg-teal-600 hover:bg-teal-700">
-                  <Save className="mr-2 h-4 w-4" />
-                  Save Changes
-                </Button>
-              </>
-            ) : (
-              <Button onClick={() => setIsEditing(true)} className="bg-teal-600 hover:bg-teal-700">
-                <Edit className="mr-2 h-4 w-4" />
-                Edit Profile
+        <div className="flex gap-2">
+          {isEditing ? (
+            <>
+              <Button variant="outline" onClick={handleCancelClick}>
+                <X className="mr-2 h-4 w-4" />
+                Cancel
               </Button>
-            )}
-          </div>
-        )}
+              <Button onClick={handleSave} className="bg-teal-600 hover:bg-teal-700" disabled={isLoading}>
+                <Save className="mr-2 h-4 w-4" />
+                {isLoading ? "Saving..." : "Save Changes"}
+              </Button>
+            </>
+          ) : (
+            <Button onClick={handleEditClick} className="bg-teal-600 hover:bg-teal-700">
+              <Edit className="mr-2 h-4 w-4" />
+              Edit Profile
+            </Button>
+          )}
+        </div>
       </div>
 
       {/* Profile Card */}
-      <ProfileCard userId={params.userId} />
+      <ProfileCard />
 
       {/* Basic Information */}
       <Card className="shadow-[0_0_15px_rgba(255,255,255,0.1)] hover:shadow-[0_0_25px_rgba(255,255,255,0.2)] transition-shadow">
@@ -171,7 +266,9 @@ export default function ProfilePage({ params }: ProfilePageProps) {
                   onChange={(e) => setCurrentProfile((prev) => ({ ...prev, DOB: e.target.value }))}
                 />
               ) : (
-                <p className="p-2 bg-background rounded border">{new Date(currentProfile.DOB).toLocaleDateString()}</p>
+                <p className="p-2 bg-background rounded border">
+                  {currentProfile.DOB ? new Date(currentProfile.DOB).toLocaleDateString() : "Not specified"}
+                </p>
               )}
             </div>
 
@@ -235,7 +332,9 @@ export default function ProfilePage({ params }: ProfilePageProps) {
                   placeholder="175"
                 />
               ) : (
-                <p className="p-2 bg-background rounded border">{currentProfile.height} cm</p>
+                <p className="p-2 bg-background rounded border">
+                  {currentProfile.height ? `${currentProfile.height} cm` : "Not specified"}
+                </p>
               )}
             </div>
 
@@ -251,7 +350,9 @@ export default function ProfilePage({ params }: ProfilePageProps) {
                   placeholder="70.5"
                 />
               ) : (
-                <p className="p-2 bg-background rounded border">{currentProfile.weight} kg</p>
+                <p className="p-2 bg-background rounded border">
+                  {currentProfile.weight ? `${currentProfile.weight} kg` : "Not specified"}
+                </p>
               )}
             </div>
           </div>
@@ -262,15 +363,13 @@ export default function ProfilePage({ params }: ProfilePageProps) {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Family Doctors */}
         <Card className="shadow-[0_0_15px_rgba(255,255,255,0.1)] hover:shadow-[0_0_25px_rgba(255,255,255,0.2)] transition-shadow">
-
-
           <CardHeader>
             <CardTitle>Family Doctors</CardTitle>
             <CardDescription>Healthcare provider contact information</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
-              {currentProfile.family_doctor_email.map((email, index) => (
+              {profile.family_doctor_email?.map((email, index) => (
                 <div key={index} className="flex items-center justify-between p-2 bg-background rounded border">
                   <span className="text-sm">{email}</span>
                   {isEditing && (
@@ -303,7 +402,7 @@ export default function ProfilePage({ params }: ProfilePageProps) {
                   </Button>
                 </div>
               )}
-              {currentProfile.family_doctor_email.length === 0 && !isEditing && (
+              {(!profile.family_doctor_email || profile.family_doctor_email.length === 0) && !isEditing && (
                 <p className="text-muted-foreground text-sm">No family doctors added</p>
               )}
             </div>
