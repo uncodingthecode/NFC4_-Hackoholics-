@@ -2,6 +2,8 @@
 
 import type React from "react"
 import { useState, useCallback } from "react"
+import { useHealthcare } from "@/context/healthcare-context"
+import { useToast } from "@/hooks/use-toast"
 import {
   Card,
   CardContent,
@@ -84,55 +86,37 @@ export function OCRUploader({ onClose, onUploadComplete }: OCRUploaderProps) {
     setIsProcessing(true)
 
     try {
+      // Create FormData
       const formData = new FormData()
-      formData.append("prescription", selectedFile)
-
-      const token = localStorage.getItem("accessToken") || ""
+      formData.append("image", selectedFile)
 
       // Step 1: Upload prescription
-      const uploadRes = await fetch("http://localhost:8000/api/v1/prescriptions", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-        body: formData,
-      })
-
-      const uploadData = await uploadRes.json()
-      if (!uploadRes.ok) throw new Error(uploadData.error || "Upload failed")
-
-      const { prescription } = uploadData
-
-      // Step 2: Process OCR and extract medications
-      const processRes = await fetch(
-        `http://localhost:8000/api/v1/prescriptions/${prescription._id}/process`,
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        }
-      )
-
-      const processData = await processRes.json()
-      if (!processRes.ok) throw new Error(processData.error || "Processing failed")
-
-      const meds = processData.prescription.extracted_medications || []
+      const prescription = await uploadPrescription(formData)
+      
+      // Step 2: Process with Gemini
+      await processPrescriptionWithGemini(prescription._id)
 
       // Combine results
       const finalOCRResult: OCRResult = {
         id: prescription._id,
         image_url: prescription.image_url,
-        ocr_text: prescription.ocr_text || uploadData.ocrResult?.text || "",
-        extracted_medications: meds,
-        confidence: 0.95, // Optional: estimate or get from backend
+        ocr_text: prescription.ocr_text || "",
+        extracted_medications: prescription.extracted_medications || [],
+        confidence: 0.95
       }
 
       setOcrResult(finalOCRResult)
+      toast({
+        title: "Prescription processed successfully",
+        description: "Text extracted and medications identified.",
+      })
     } catch (error) {
       console.error("OCR processing failed:", error)
-      alert("OCR processing failed. Please try again.")
+      toast({
+        title: "Processing failed",
+        description: error instanceof Error ? error.message : "Please try again",
+        variant: "destructive",
+      })
     } finally {
       setIsProcessing(false)
     }

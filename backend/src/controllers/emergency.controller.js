@@ -199,6 +199,10 @@ export const testEmergency = async (req, res) => {
 // Generate AI summary for health reports
 export const generateHealthReportSummary = async (req, res) => {
   try {
+    if (!process.env.GEMINI_API_KEY) {
+      throw new Error('GEMINI_API_KEY is not configured');
+    }
+
     const { vitals, medications, profile, healthScoreData } = req.body;
     
     // Prepare data for AI analysis

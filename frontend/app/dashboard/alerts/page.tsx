@@ -9,8 +9,8 @@ import { AlertTriangle, CheckCircle, Clock, TrendingUp } from "lucide-react"
 export default function AlertsPage() {
   const { alerts, acknowledgeAlert } = useHealthcare()
 
-  const getSeverityColor = (severity: string) => {
-    switch (severity) {
+  const getSeverityColor = (severity: string | undefined) => {
+    switch (severity?.toLowerCase()) {
       case "high":
         return "destructive"
       case "moderate":
@@ -22,8 +22,8 @@ export default function AlertsPage() {
     }
   }
 
-  const getSeverityIcon = (severity: string) => {
-    switch (severity) {
+  const getSeverityIcon = (severity: string | undefined) => {
+    switch (severity?.toLowerCase()) {
       case "high":
         return <AlertTriangle className="h-4 w-4" />
       case "moderate":
@@ -104,9 +104,11 @@ export default function AlertsPage() {
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-2">
                           <Badge variant={getSeverityColor(alert.severity) as any}>
-                            {alert.severity.toUpperCase()}
+                            {(alert.severity || "unknown").toUpperCase()}
                           </Badge>
-                          <Badge variant="outline">{alert.type.replace("_", " ").toUpperCase()}</Badge>
+                          <Badge variant="outline">
+                            {(alert.type || "alert").replace("_", " ").toUpperCase()}
+                          </Badge>
                         </div>
                         <p className="font-medium text-foreground mb-1">{alert.message}</p>
                         <p className="text-sm text-muted-foreground">
@@ -140,8 +142,10 @@ export default function AlertsPage() {
                     </div>
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-2">
-                        <Badge variant="secondary">{alert.severity.toUpperCase()}</Badge>
-                        <Badge variant="outline">{alert.type.replace("_", " ").toUpperCase()}</Badge>
+                        <Badge variant="secondary">{(alert.severity || "unknown").toUpperCase()}</Badge>
+                        <Badge variant="outline">
+                          {(alert.type || "alert").replace("_", " ").toUpperCase()}
+                        </Badge>
                         <Badge variant="outline" className="text-green-600">
                           ACKNOWLEDGED
                         </Badge>

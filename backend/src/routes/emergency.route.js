@@ -5,6 +5,7 @@ import {
   mailEmergencyContacts,
   shareSummary,
   testEmergency,
+  generateHealthReportSummary,
 } from "../controllers/emergency.controller.js";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
 
@@ -42,5 +43,11 @@ router.post("/share-summary", shareSummary);
  * @desc Test endpoint to check if emergency routes are working
  */
 router.get("/test", testEmergency);
+
+/**
+ * @route POST /api/v1/emergency/generate-summary
+ * @desc Generate an AI-powered health report summary
+ */
+router.post("/generate-summary", generateHealthReportSummary);
 
 export default router;

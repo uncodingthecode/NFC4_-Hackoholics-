@@ -14,6 +14,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useToast } from "@/hooks/use-toast"
+import { useHealthcare } from "@/context/healthcare-context"
 // Update the import to match the actual export from '@/lib/api'
 import { familyAPI } from "@/lib/api"
 

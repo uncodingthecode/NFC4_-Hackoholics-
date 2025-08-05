@@ -81,12 +81,35 @@ export default function ReportsPage() {
     
     try {
       // Generate AI summary
-      const aiSummary = await generateHealthReportSummary({
-        vitals: chartData,
-        medications,
-        profile,
-        healthScoreData
-      });
+      let aiSummary;
+      try {
+        aiSummary = await generateHealthReportSummary({
+          vitals: chartData,
+          medications,
+          profile,
+          healthScoreData
+        });
+      } catch (error) {
+        console.error("Failed to generate AI summary:", error);
+        // Provide a basic summary if AI generation fails
+        aiSummary = `Health Summary Report
+
+Patient Information:
+- Name: ${profile?.user_id || "Not available"}
+- Age: ${profile ? Math.floor((new Date().getTime() - new Date(profile.DOB).getTime()) / (365.25 * 24 * 60 * 60 * 1000)) : "Not available"} years
+- Blood Group: ${profile?.blood_group || "Not available"}
+
+Vital Signs Summary:
+- Latest Blood Pressure: ${last?.systolic || "N/A"}/${last?.diastolic || "N/A"} mmHg
+- Latest Blood Sugar: ${last?.sugar || "N/A"} mg/dL
+- Latest Weight: ${last?.weight || "N/A"} kg
+- Latest Temperature: ${last?.temperature || "N/A"}°F
+
+Current Medications:
+${medications.map(med => `- ${med.medicine_name} (${med.dosage})`).join('\n') || "No current medications"}
+
+Note: This is a basic summary. For detailed analysis, please consult your healthcare provider.`;
+      }
 
       // Create PDF with AI summary
       const pdf = new jsPDF("p", "mm", "a4");
