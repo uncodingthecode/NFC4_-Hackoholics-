@@ -16,6 +16,9 @@ import aiAgentRouter from './routes/aiAgent.route.js';
 import notificationRouter from './routes/notification.route.js';
 import ocrRouter from './routes/ocr.route.js';
 import agentRoutes from "./routes/agent.routes.js";
+import reportRouter from './routes/report.routes.js';
+import wearableRouter from './routes/wearable.routes.js';
+import cloudSyncRouter from './routes/cloudSync.routes.js';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -48,6 +51,9 @@ app.use('/api/v1/emergency', emergencyRouter);
 app.use('/api/v1/ai', aiAgentRouter);
 app.use('/api/v1/notifications', notificationRouter);
 app.use('/api/v1/agent', agentRoutes);
+app.use('/api/v1/reports', reportRouter);
+app.use('/api/v1/wearables', wearableRouter);
+app.use('/api/v1/cloud-sync', cloudSyncRouter);
 
 
 export default app;

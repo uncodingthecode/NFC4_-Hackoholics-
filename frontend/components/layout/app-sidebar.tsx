@@ -1,6 +1,6 @@
 "use client"
 
-import { Calendar, Heart, Home, MessageCircle, Pill, Shield, TrendingUp, User, FileText, Bell } from "lucide-react"
+import { Calendar, Heart, Home, MessageCircle, Pill, Shield, TrendingUp, User, FileText, Bell, Brain, Watch, Cloud } from "lucide-react"
 import {
   Sidebar,
   SidebarContent,
@@ -47,6 +47,21 @@ const menuItems = [
     title: "Prescriptions",
     url: "/dashboard/prescriptions",
     icon: FileText,
+  },
+  {
+    title: "Reports",
+    url: "/dashboard/reports",
+    icon: Brain,
+  },
+  {
+    title: "Wearables",
+    url: "/dashboard/wearables",
+    icon: Watch,
+  },
+  {
+    title: "Cloud Sync",
+    url: "/dashboard/cloud-sync",
+    icon: Cloud,
   },
   {
     title: "Alerts",

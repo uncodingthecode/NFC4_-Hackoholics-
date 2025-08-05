@@ -10,6 +10,7 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "@google/generative-ai": "^0.21.0",
     "bcrypt": "^6.0.0",
     "cloudinary": "^2.7.0",
     "cookie-parser": "^1.4.7",
@@ -25,6 +26,12 @@
     "mongoose-aggregate-paginate-v2": "^1.1.4",
     "multer": "^2.0.2",
     "nodemailer": "^7.0.5",
-    "tesseract.js": "^6.0.1"
+    "pdfkit": "^0.15.0",
+    "tesseract.js": "^6.0.1",
+    "axios": "^1.7.0",
+    "node-cron": "^3.0.3"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.0"
   }
 }
