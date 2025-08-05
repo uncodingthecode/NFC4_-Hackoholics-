@@ -16,54 +16,50 @@ interface Message {
 }
 
 export default function ChatPage() {
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: "1",
-      sender: "ai",
-      content: "Hello! I'm your AI health assistant. How can I help you today?",
-      timestamp: new Date(Date.now() - 60000),
-    },
-    {
-      id: "2",
-      sender: "user",
-      content: "I've been experiencing some chest discomfort lately. Should I be concerned?",
-      timestamp: new Date(Date.now() - 30000),
-    },
-    {
-      id: "3",
-      sender: "ai",
-      content:
-        "I understand your concern about chest discomfort. While I can provide general information, it's important to consult with a healthcare professional for proper evaluation. Based on your recent vitals, I notice your blood pressure has been slightly elevated. I recommend scheduling an appointment with Dr. Johnson.",
-      timestamp: new Date(Date.now() - 15000),
-    },
-  ])
+  const [messages, setMessages] = useState<Message[]>([])
   const [newMessage, setNewMessage] = useState("")
 
-  const handleSendMessage = () => {
-    if (!newMessage.trim()) return
+  // Replace simulated AI response
+const [isLoading, setIsLoading] = useState(false);
 
-    const message: Message = {
-      id: Date.now().toString(),
-      sender: "user",
-      content: newMessage,
+const handleSendMessage = async () => {
+  if (!newMessage.trim()) return;
+
+  const message: Message = {
+    id: Date.now().toString(),
+    sender: "user",
+    content: newMessage,
+    timestamp: new Date(),
+  };
+
+  setMessages((prev) => [...prev, message]);
+  setNewMessage("");
+  setIsLoading(true);
+
+  try {
+    const res = await fetch("http://localhost:8000/api/chat", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message: newMessage }),
+    });
+
+    const data = await res.json();
+    const aiResponse: Message = {
+      id: (Date.now() + 1).toString(),
+      sender: "ai",
+      content: data.reply,
       timestamp: new Date(),
-    }
+    };
 
-    setMessages((prev) => [...prev, message])
-    setNewMessage("")
-
-    // Simulate AI response
-    setTimeout(() => {
-      const aiResponse: Message = {
-        id: (Date.now() + 1).toString(),
-        sender: "ai",
-        content:
-          "Thank you for your message. I'm analyzing your health data to provide the best recommendations. Is there anything specific you'd like me to focus on?",
-        timestamp: new Date(),
-      }
-      setMessages((prev) => [...prev, aiResponse])
-    }, 1000)
+    setMessages((prev) => [...prev, aiResponse]);
+  } catch (err) {
+    console.error("Error fetching AI reply", err);
+  } finally {
+    setIsLoading(false);
   }
+};
+
+
 
   const getSenderIcon = (sender: string) => {
     switch (sender) {

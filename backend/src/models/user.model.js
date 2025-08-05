@@ -27,6 +27,13 @@ const userSchema = new mongoose.Schema(
       enum: ['head', 'member'],
       required: true,
     },
+    relation: {
+      type: String,
+      required: function() {
+        return this.role === 'member';
+      },
+      enum: ['son', 'daughter', 'spouse', 'father', 'mother', 'grandparent', 'sibling', 'other'],
+    },
     family_id: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Family",

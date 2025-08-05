@@ -16,7 +16,7 @@ const generateTokens = async (userId) => {
 
 export const registerUser = async (req, res) => {
   try {
-    const { name, email, password, role, familyId } = req.body;
+    const { name, email, password, role, familyId, relation } = req.body;
 
     if (!name || !email || !password || !role) {
       return res.status(400).json({ error: "All fields are required" });
@@ -79,22 +79,26 @@ export const registerUser = async (req, res) => {
         await user.save();
       }
     } else if (role === "member") {
-      // For member users, familyId is required
+      // For member users, familyId and relation are required
       if (!familyId) {
         return res.status(400).json({ error: "Family ID is required for members" });
+      }
+      if (!relation) {
+        return res.status(400).json({ error: "Relation is required for members" });
       }
       family = await Family.findById(familyId);
       if (!family) {
         return res.status(404).json({ error: "Family not found" });
       }
       finalFamilyId = familyId;
-      // Create user with family_id
+      // Create user with family_id and relation
       user = await User.create({
         name,
         email,
         password_hash: password,
         role,
-        family_id: finalFamilyId
+        family_id: finalFamilyId,
+        relation
       });
       // Add member to family
       await Family.findByIdAndUpdate(

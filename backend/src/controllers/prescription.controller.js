@@ -2,7 +2,11 @@ import  Prescription  from "../models/prescription.model.js";
 import  Medication  from "../models/medication.model.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
 import { processOCR } from "./ocr.controller.js";
+import { extractMedicationsFromPrescription } from "../utils/geminiService.js";
 import fs from 'fs';
+import { createWorker } from 'tesseract.js';
+import path from 'path';
+import gtts from 'gtts';
 
 export const uploadPrescription = async (req, res) => {
   try {
@@ -16,43 +20,80 @@ export const uploadPrescription = async (req, res) => {
       return res.status(500).json({ error: "Failed to upload prescription" });
     }
 
-    // Step 2: Process OCR
-    const ocrResult = await processOCR(req, {
-      json: (data) => data, // Mock response handler for internal call
-      status: () => ({
-        json: (data) => data
-      })
-    });
+    let ocrText = "";
+    let audioUrl = null;
 
-    if (ocrResult.error) {
-      return res.status(500).json({ error: "OCR processing failed", details: ocrResult.error });
+    // Step 2: Process OCR directly
+    const imagePath = req.file.path;
+    console.log("Processing OCR for file:", imagePath);
+    console.log("File exists:", fs.existsSync(imagePath));
+    
+    if (!fs.existsSync(imagePath)) {
+      console.log("File not found, skipping OCR");
+    } else {
+      console.log("File size:", fs.statSync(imagePath).size, "bytes");
+      
+      const worker = await createWorker("eng");
+      
+      try {
+        const { data: { text } } = await worker.recognize(imagePath);
+        await worker.terminate();
+        
+        console.log("OCR raw text:", text);
+        console.log("OCR text length:", text ? text.length : 0);
+        
+        if (text && text.trim()) {
+          ocrText = text.trim();
+          
+          // Generate audio if text exists
+          const audioDir = path.join(__dirname, "..", "tts_output");
+          fs.mkdirSync(audioDir, { recursive: true });
+          
+          const audioFile = `${Date.now()}.mp3`;
+          const audioPath = path.join(audioDir, audioFile);
+          
+          const tts = new gtts(ocrText, "en");
+          await new Promise((resolve, reject) => {
+            tts.save(audioPath, (err) => {
+              if (err) {
+                reject(err);
+              } else {
+                audioUrl = `/audio/${audioFile}`;
+                resolve();
+              }
+            });
+          });
+        } else {
+          console.log("OCR returned empty or null text");
+        }
+      } catch (ocrError) {
+        console.error("OCR processing error:", ocrError);
+        // Continue without OCR text if it fails
+      }
     }
 
     // Step 3: Create prescription record
     const prescription = await Prescription.create({
       user_id: req.user._id,
       image_url: result.url,
-      ocr_text: ocrResult.text,
-      audio_url: ocrResult.audioUrl
+      ocr_text: ocrText,
+      audio_url: audioUrl
     });
 
-    // Cleanup the temporary file
-    fs.unlinkSync(req.file.path);
+    // Keep the local file for manual cleanup
+    console.log("Local file kept for manual cleanup:", req.file.path);
 
     return res.status(201).json({
       success: true,
       prescription,
       ocrResult: {
-        text: ocrResult.text,
-        audioUrl: ocrResult.audioUrl
+        text: ocrText,
+        audioUrl: audioUrl
       }
     });
 
   } catch (error) {
-    // Cleanup the temporary file in case of error
-    if (req.file?.path) {
-      fs.unlinkSync(req.file.path).catch(() => {});
-    }
+    console.error("Upload prescription error:", error);
     return res.status(500).json({ 
       error: error.message,
       stack: process.env.NODE_ENV === 'development' ? error.stack : undefined

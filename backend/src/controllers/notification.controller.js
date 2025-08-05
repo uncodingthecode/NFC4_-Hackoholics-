@@ -43,15 +43,3 @@ export const markAllAsRead = async (req, res) => {
     return res.status(500).json({ error: error.message });
   }
 };
-
-export const createMedicationReminder = async (medication) => {
-  try {
-    await Notification.create({
-      user_id: medication.user_id,
-      type: 'med_reminder',
-      message: `Time to take ${medication.medicine_name} (${medication.dosage})`
-    });
-  } catch (error) {
-    console.error("Error creating reminder:", error);
-  }
-};
