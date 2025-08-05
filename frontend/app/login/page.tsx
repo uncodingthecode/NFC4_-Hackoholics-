@@ -62,8 +62,8 @@ export default function LoginPage() {
               <Heart className="h-10 w-10 text-white" />
             </div>
           </div>
-          <h1 className="text-3xl font-bold text-gray-900">HealthCare Dashboard</h1>
-          <p className="text-gray-600">Sign in to manage your family's health</p>
+          <h1 className="text-3xl font-bold text-foreground">HealthCare Dashboard</h1>
+          <p className="text-muted-foreground">Sign in to manage your family's health</p>
         </div>
 
         {/* Login Form */}
@@ -118,7 +118,7 @@ export default function LoginPage() {
                     type="checkbox"
                     className="rounded border-gray-300 text-teal-600 focus:ring-teal-500"
                   />
-                  <Label htmlFor="remember" className="text-sm text-gray-600">
+                  <Label htmlFor="remember" className="text-sm text-muted-foreground">
                     Remember me
                   </Label>
                 </div>
@@ -144,7 +144,7 @@ export default function LoginPage() {
             </form>
 
             <div className="mt-6 text-center">
-              <p className="text-sm text-gray-600">
+              <p className="text-sm text-muted-foreground">
                 Don't have an account?{" "}
                 <Link href="/register" className="text-teal-600 hover:text-teal-500 font-medium">
                   Create one here

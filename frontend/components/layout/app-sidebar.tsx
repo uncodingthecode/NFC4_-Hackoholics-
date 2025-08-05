@@ -77,14 +77,14 @@ export function AppSidebar() {
             <Heart className="h-6 w-6 text-teal-600" />
           </div>
           <div>
-            <h2 className="font-semibold text-gray-900">HealthCare</h2>
-            <p className="text-sm text-gray-600">{family?.name || "Family Dashboard"}</p>
+            <h2 className="font-semibold text-foreground">HealthCare</h2>
+            <p className="text-sm text-muted-foreground">{family?.name || "Family Dashboard"}</p>
           </div>
         </div>
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel className="text-gray-500 font-medium">Navigation</SidebarGroupLabel>
+          <SidebarGroupLabel className="text-muted-foreground font-medium">Navigation</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {menuItems.map((item) => (

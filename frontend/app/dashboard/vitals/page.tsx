@@ -53,8 +53,8 @@ export default function VitalsPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Vitals Tracker</h1>
-          <p className="text-gray-600">Monitor your health metrics over time</p>
+          <h1 className="text-3xl font-bold text-foreground">Vitals Tracker</h1>
+          <p className="text-muted-foreground">Monitor your health metrics over time</p>
         </div>
         <Button onClick={() => setShowAddModal(true)} className="bg-teal-600 hover:bg-teal-700">
           <Plus className="mr-2 h-4 w-4" />
@@ -133,7 +133,9 @@ export default function VitalsPage() {
 
       {/* Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card>
+        <Card className="shadow-[0_0_15px_rgba(255,255,255,0.1)] hover:shadow-[0_0_25px_rgba(255,255,255,0.2)] transition-shadow">
+
+
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <TrendingUp className="h-5 w-5 text-red-500" />
@@ -155,7 +157,9 @@ export default function VitalsPage() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="shadow-[0_0_15px_rgba(255,255,255,0.1)] hover:shadow-[0_0_25px_rgba(255,255,255,0.2)] transition-shadow">
+
+
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Droplets className="h-5 w-5 text-blue-500" />
@@ -178,7 +182,9 @@ export default function VitalsPage() {
       </div>
 
       {/* Recent Vitals History */}
-      <Card>
+      <Card className="shadow-[0_0_15px_rgba(255,255,255,0.1)] hover:shadow-[0_0_25px_rgba(255,255,255,0.2)] transition-shadow">
+
+
         <CardHeader>
           <CardTitle>Recent Vitals History</CardTitle>
           <CardDescription>Your latest vital sign measurements</CardDescription>
@@ -191,7 +197,7 @@ export default function VitalsPage() {
               .map((vital) => (
                 <div key={vital._id} className="flex items-center justify-between p-4 border rounded-lg">
                   <div className="flex items-center gap-4">
-                    <div className="text-sm text-gray-600">
+                    <div className="text-sm text-muted-foreground">
                       {vital.timestamp.toLocaleDateString()} at {vital.timestamp.toLocaleTimeString()}
                     </div>
                   </div>
@@ -200,19 +206,19 @@ export default function VitalsPage() {
                       <div className="text-sm font-medium">
                         {vital.bp_systolic}/{vital.bp_diastolic}
                       </div>
-                      <div className="text-xs text-gray-500">BP (mmHg)</div>
+                      <div className="text-xs text-muted-foreground">BP (mmHg)</div>
                     </div>
                     <div className="text-center">
                       <div className="text-sm font-medium">{vital.sugar}</div>
-                      <div className="text-xs text-gray-500">Sugar (mg/dL)</div>
+                      <div className="text-xs text-muted-foreground">Sugar (mg/dL)</div>
                     </div>
                     <div className="text-center">
                       <div className="text-sm font-medium">{vital.weight}</div>
-                      <div className="text-xs text-gray-500">Weight (kg)</div>
+                      <div className="text-xs text-muted-foreground">Weight (kg)</div>
                     </div>
                     <div className="text-center">
                       <div className="text-sm font-medium">{vital.temperature}</div>
-                      <div className="text-xs text-gray-500">Temp (°F)</div>
+                      <div className="text-xs text-muted-foreground">Temp (°F)</div>
                     </div>
                   </div>
                 </div>
@@ -222,11 +228,13 @@ export default function VitalsPage() {
       </Card>
 
       {vitals.length === 0 && (
-        <Card>
+        <Card className="shadow-[0_0_15px_rgba(255,255,255,0.1)] hover:shadow-[0_0_25px_rgba(255,255,255,0.2)] transition-shadow">
+
+
           <CardContent className="text-center py-12">
             <TrendingUp className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">No vitals recorded</h3>
-            <p className="text-gray-600 mb-4">Start tracking your health by recording your first vital signs</p>
+            <h3 className="text-lg font-medium text-foreground mb-2">No vitals recorded</h3>
+            <p className="text-muted-foreground mb-4">Start tracking your health by recording your first vital signs</p>
             <Button onClick={() => setShowAddModal(true)} className="bg-teal-600 hover:bg-teal-700">
               <Plus className="mr-2 h-4 w-4" />
               Add Vitals

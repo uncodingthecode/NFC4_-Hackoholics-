@@ -43,8 +43,8 @@ export default function AlertsPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Health Alerts</h1>
-          <p className="text-gray-600">Monitor important health notifications and AI insights</p>
+          <h1 className="text-3xl font-bold text-foreground">Health Alerts</h1>
+          <p className="text-muted-foreground">Monitor important health notifications and AI insights</p>
         </div>
         <div className="flex items-center gap-2">
           <Badge variant="destructive" className="text-sm">
@@ -66,7 +66,7 @@ export default function AlertsPage() {
         </CardHeader>
         <CardContent>
           <div className="space-y-3">
-            <div className="p-3 bg-white rounded-lg border border-teal-200">
+            <div className="p-3 bg-card rounded-lg border border-teal-200">
               <p className="font-medium text-teal-800">Blood Pressure Trend Analysis</p>
               <p className="text-sm text-teal-600 mt-1">
                 Your BP readings have been elevated for 3 consecutive days. Consider scheduling a consultation with your
@@ -80,7 +80,7 @@ export default function AlertsPage() {
                 Schedule Appointment
               </Button>
             </div>
-            <div className="p-3 bg-white rounded-lg border border-teal-200">
+            <div className="p-3 bg-card rounded-lg border border-teal-200">
               <p className="font-medium text-teal-800">Medication Adherence</p>
               <p className="text-sm text-teal-600 mt-1">
                 Great job! You've maintained 95% medication adherence this month.
@@ -93,7 +93,7 @@ export default function AlertsPage() {
       {/* Unacknowledged Alerts */}
       {unacknowledgedAlerts.length > 0 && (
         <div className="space-y-4">
-          <h2 className="text-xl font-semibold text-gray-900">Unread Alerts</h2>
+          <h2 className="text-xl font-semibold text-foreground">Unread Alerts</h2>
           <div className="space-y-3">
             {unacknowledgedAlerts.map((alert) => (
               <Card key={alert._id} className="border-l-4 border-l-red-500">
@@ -108,8 +108,8 @@ export default function AlertsPage() {
                           </Badge>
                           <Badge variant="outline">{alert.type.replace("_", " ").toUpperCase()}</Badge>
                         </div>
-                        <p className="font-medium text-gray-900 mb-1">{alert.message}</p>
-                        <p className="text-sm text-gray-600">
+                        <p className="font-medium text-foreground mb-1">{alert.message}</p>
+                        <p className="text-sm text-muted-foreground">
                           {alert.timestamp.toLocaleDateString()} at {alert.timestamp.toLocaleTimeString()}
                         </p>
                       </div>
@@ -129,7 +129,7 @@ export default function AlertsPage() {
       {/* Acknowledged Alerts */}
       {acknowledgedAlerts.length > 0 && (
         <div className="space-y-4">
-          <h2 className="text-xl font-semibold text-gray-900">Recent Alerts</h2>
+          <h2 className="text-xl font-semibold text-foreground">Recent Alerts</h2>
           <div className="space-y-3">
             {acknowledgedAlerts.slice(0, 5).map((alert) => (
               <Card key={alert._id} className="opacity-75">
@@ -147,7 +147,7 @@ export default function AlertsPage() {
                         </Badge>
                       </div>
                       <p className="font-medium text-gray-700 mb-1">{alert.message}</p>
-                      <p className="text-sm text-gray-500">
+                      <p className="text-sm text-muted-foreground">
                         {alert.timestamp.toLocaleDateString()} at {alert.timestamp.toLocaleTimeString()}
                       </p>
                     </div>
@@ -160,11 +160,13 @@ export default function AlertsPage() {
       )}
 
       {alerts.length === 0 && (
-        <Card>
+        <Card className="shadow-[0_0_15px_rgba(255,255,255,0.1)] hover:shadow-[0_0_25px_rgba(255,255,255,0.2)] transition-shadow">
+
+
           <CardContent className="text-center py-12">
             <CheckCircle className="mx-auto h-12 w-12 text-green-500 mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">No alerts</h3>
-            <p className="text-gray-600">You're all caught up! No health alerts at this time.</p>
+            <h3 className="text-lg font-medium text-foreground mb-2">No alerts</h3>
+            <p className="text-muted-foreground">You're all caught up! No health alerts at this time.</p>
           </CardContent>
         </Card>
       )}

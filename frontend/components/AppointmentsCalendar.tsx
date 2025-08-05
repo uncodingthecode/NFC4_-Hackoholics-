@@ -99,7 +99,7 @@ export function AppointmentsCalendar({ appointments }: AppointmentsCalendarProps
       <div className="grid grid-cols-7 gap-1">
         {/* Day headers */}
         {dayNames.map((day) => (
-          <div key={day} className="p-2 text-center text-sm font-medium text-gray-500">
+          <div key={day} className="p-2 text-center text-sm font-medium text-muted-foreground">
             {day}
           </div>
         ))}
@@ -107,7 +107,7 @@ export function AppointmentsCalendar({ appointments }: AppointmentsCalendarProps
         {/* Calendar days */}
         {days.map((day, index) => {
           if (!day) {
-            return <div key={index} className="p-2 h-24" />
+            return <div key={`empty-${index}`} className="p-2 h-24" />
           }
 
           const date = new Date(currentDate.getFullYear(), currentDate.getMonth(), day)
@@ -119,12 +119,12 @@ export function AppointmentsCalendar({ appointments }: AppointmentsCalendarProps
 
           return (
             <div
-              key={day}
+              key={`day-${currentDate.getFullYear()}-${currentDate.getMonth()}-${day}`}
               className={`p-2 h-24 border rounded-lg transition-colors hover:bg-gray-50 ${
                 isToday ? "bg-teal-50 border-teal-200" : "border-gray-200"
               }`}
             >
-              <div className={`text-sm font-medium mb-1 ${isToday ? "text-teal-600" : "text-gray-900"}`}>{day}</div>
+              <div className={`text-sm font-medium mb-1 ${isToday ? "text-teal-600" : "text-foreground"}`}>{day}</div>
               <div className="space-y-1">
                 {dayAppointments.slice(0, 2).map((apt) => (
                   <div
@@ -136,7 +136,7 @@ export function AppointmentsCalendar({ appointments }: AppointmentsCalendarProps
                   </div>
                 ))}
                 {dayAppointments.length > 2 && (
-                  <div className="text-xs text-gray-500">+{dayAppointments.length - 2} more</div>
+                  <div className="text-xs text-muted-foreground">+{dayAppointments.length - 2} more</div>
                 )}
               </div>
             </div>
@@ -145,7 +145,9 @@ export function AppointmentsCalendar({ appointments }: AppointmentsCalendarProps
       </div>
 
       {/* Today's Appointments */}
-      <Card>
+      <Card className="shadow-[0_0_15px_rgba(255,255,255,0.1)] hover:shadow-[0_0_25px_rgba(255,255,255,0.2)] transition-shadow">
+
+
         <CardContent className="p-4">
           <h4 className="font-medium mb-3 flex items-center gap-2">
             <Calendar className="h-4 w-4 text-teal-600" />
@@ -164,11 +166,11 @@ export function AppointmentsCalendar({ appointments }: AppointmentsCalendarProps
               <div key={apt._id} className="flex items-center justify-between p-2 border rounded mb-2 last:mb-0">
                 <div>
                   <p className="font-medium text-sm">{apt.doctor_name}</p>
-                  <p className="text-xs text-gray-600">{apt.type}</p>
+                  <p className="text-xs text-muted-foreground">{apt.type}</p>
                 </div>
                 <div className="flex items-center gap-2">
                   <Clock className="h-3 w-3 text-gray-400" />
-                  <span className="text-xs text-gray-600">
+                  <span className="text-xs text-muted-foreground">
                     {apt.date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
                   </span>
                 </div>
@@ -181,7 +183,7 @@ export function AppointmentsCalendar({ appointments }: AppointmentsCalendarProps
               apt.date.getMonth() === today.getMonth() &&
               apt.date.getFullYear() === today.getFullYear()
             )
-          }).length === 0 && <p className="text-sm text-gray-500">No appointments today</p>}
+          }).length === 0 && <p className="text-sm text-muted-foreground">No appointments today</p>}
         </CardContent>
       </Card>
     </div>

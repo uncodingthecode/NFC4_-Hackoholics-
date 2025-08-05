@@ -58,8 +58,8 @@ export default function LoginForm() {
             <Heart className="h-8 w-8 text-teal-600" />
           </div>
         </div>
-        <CardTitle className="text-2xl font-bold text-gray-900">Welcome Back</CardTitle>
-        <CardDescription className="text-gray-600">Sign in to your healthcare dashboard</CardDescription>
+        <CardTitle className="text-2xl font-bold text-foreground">Welcome Back</CardTitle>
+        <CardDescription className="text-muted-foreground">Sign in to your healthcare dashboard</CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -98,7 +98,7 @@ export default function LoginForm() {
             )}
           </Button>
         </form>
-        <div className="mt-4 text-center text-sm text-gray-600">Demo credentials: john@example.com / password</div>
+        <div className="mt-4 text-center text-sm text-muted-foreground">Demo credentials: john@example.com / password</div>
       </CardContent>
     </Card>
   )

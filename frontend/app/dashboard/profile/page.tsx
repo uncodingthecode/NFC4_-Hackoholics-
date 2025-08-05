@@ -103,13 +103,13 @@ export default function ProfilePage({ params }: ProfilePageProps) {
     }))
   }
 
-  if (!profile) {
+  if (profile) {
     return (
       <div className="flex items-center justify-center h-96">
         <div className="text-center">
           <User className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-          <h3 className="text-lg font-medium text-gray-900 mb-2">Profile not found</h3>
-          <p className="text-gray-600">The requested profile could not be found.</p>
+          <h3 className="text-lg font-medium text-foreground mb-2">Profile not found</h3>
+          <p className="text-muted-foreground">The requested profile could not be found.</p>
         </div>
       </div>
     )
@@ -120,8 +120,8 @@ export default function ProfilePage({ params }: ProfilePageProps) {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Health Profile</h1>
-          <p className="text-gray-600">
+          <h1 className="text-3xl font-bold text-foreground">Health Profile</h1>
+          <p className="text-muted-foreground">
             {isOwnProfile ? "Manage your health information" : "View family member's health profile"}
           </p>
         </div>
@@ -152,7 +152,9 @@ export default function ProfilePage({ params }: ProfilePageProps) {
       <ProfileCard userId={params.userId} />
 
       {/* Basic Information */}
-      <Card>
+      <Card className="shadow-[0_0_15px_rgba(255,255,255,0.1)] hover:shadow-[0_0_25px_rgba(255,255,255,0.2)] transition-shadow">
+
+
         <CardHeader>
           <CardTitle>Basic Information</CardTitle>
           <CardDescription>Personal and medical details</CardDescription>
@@ -169,7 +171,7 @@ export default function ProfilePage({ params }: ProfilePageProps) {
                   onChange={(e) => setCurrentProfile((prev) => ({ ...prev, DOB: e.target.value }))}
                 />
               ) : (
-                <p className="p-2 bg-gray-50 rounded border">{new Date(currentProfile.DOB).toLocaleDateString()}</p>
+                <p className="p-2 bg-background rounded border">{new Date(currentProfile.DOB).toLocaleDateString()}</p>
               )}
             </div>
 
@@ -192,7 +194,7 @@ export default function ProfilePage({ params }: ProfilePageProps) {
                   </SelectContent>
                 </Select>
               ) : (
-                <p className="p-2 bg-gray-50 rounded border">{currentProfile.gender}</p>
+                <p className="p-2 bg-background rounded border">{currentProfile.gender}</p>
               )}
             </div>
 
@@ -218,7 +220,7 @@ export default function ProfilePage({ params }: ProfilePageProps) {
                   </SelectContent>
                 </Select>
               ) : (
-                <p className="p-2 bg-gray-50 rounded border">{currentProfile.blood_group || "Not specified"}</p>
+                <p className="p-2 bg-background rounded border">{currentProfile.blood_group || "Not specified"}</p>
               )}
             </div>
 
@@ -233,7 +235,7 @@ export default function ProfilePage({ params }: ProfilePageProps) {
                   placeholder="175"
                 />
               ) : (
-                <p className="p-2 bg-gray-50 rounded border">{currentProfile.height} cm</p>
+                <p className="p-2 bg-background rounded border">{currentProfile.height} cm</p>
               )}
             </div>
 
@@ -249,7 +251,7 @@ export default function ProfilePage({ params }: ProfilePageProps) {
                   placeholder="70.5"
                 />
               ) : (
-                <p className="p-2 bg-gray-50 rounded border">{currentProfile.weight} kg</p>
+                <p className="p-2 bg-background rounded border">{currentProfile.weight} kg</p>
               )}
             </div>
           </div>
@@ -259,7 +261,9 @@ export default function ProfilePage({ params }: ProfilePageProps) {
       {/* Medical Information */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Family Doctors */}
-        <Card>
+        <Card className="shadow-[0_0_15px_rgba(255,255,255,0.1)] hover:shadow-[0_0_25px_rgba(255,255,255,0.2)] transition-shadow">
+
+
           <CardHeader>
             <CardTitle>Family Doctors</CardTitle>
             <CardDescription>Healthcare provider contact information</CardDescription>
@@ -267,7 +271,7 @@ export default function ProfilePage({ params }: ProfilePageProps) {
           <CardContent>
             <div className="space-y-3">
               {currentProfile.family_doctor_email.map((email, index) => (
-                <div key={index} className="flex items-center justify-between p-2 bg-gray-50 rounded border">
+                <div key={index} className="flex items-center justify-between p-2 bg-background rounded border">
                   <span className="text-sm">{email}</span>
                   {isEditing && (
                     <Button
@@ -300,14 +304,16 @@ export default function ProfilePage({ params }: ProfilePageProps) {
                 </div>
               )}
               {currentProfile.family_doctor_email.length === 0 && !isEditing && (
-                <p className="text-gray-500 text-sm">No family doctors added</p>
+                <p className="text-muted-foreground text-sm">No family doctors added</p>
               )}
             </div>
           </CardContent>
         </Card>
 
         {/* Allergies */}
-        <Card>
+        <Card className="shadow-[0_0_15px_rgba(255,255,255,0.1)] hover:shadow-[0_0_25px_rgba(255,255,255,0.2)] transition-shadow">
+
+
           <CardHeader>
             <CardTitle>Allergies</CardTitle>
             <CardDescription>Known allergic reactions</CardDescription>
@@ -350,7 +356,7 @@ export default function ProfilePage({ params }: ProfilePageProps) {
                 </div>
               )}
               {currentProfile.allergies.length === 0 && !isEditing && (
-                <p className="text-gray-500 text-sm">No known allergies</p>
+                <p className="text-muted-foreground text-sm">No known allergies</p>
               )}
             </div>
           </CardContent>
@@ -358,7 +364,9 @@ export default function ProfilePage({ params }: ProfilePageProps) {
       </div>
 
       {/* Existing Conditions */}
-      <Card>
+      <Card className="shadow-[0_0_15px_rgba(255,255,255,0.1)] hover:shadow-[0_0_25px_rgba(255,255,255,0.2)] transition-shadow">
+
+
         <CardHeader>
           <CardTitle>Existing Medical Conditions</CardTitle>
           <CardDescription>Current health conditions and diagnoses</CardDescription>
@@ -401,7 +409,7 @@ export default function ProfilePage({ params }: ProfilePageProps) {
               </div>
             )}
             {currentProfile.existing_conditions.length === 0 && !isEditing && (
-              <p className="text-gray-500 text-sm">No existing conditions reported</p>
+              <p className="text-muted-foreground text-sm">No existing conditions reported</p>
             )}
           </div>
         </CardContent>

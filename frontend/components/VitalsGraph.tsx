@@ -61,7 +61,9 @@ export function VitalsGraph({ vitals, type, title, color }: VitalsGraphProps) {
   const dataKeys = getDataKey()
 
   return (
-    <Card>
+    <Card className="shadow-[0_0_15px_rgba(255,255,255,0.1)] hover:shadow-[0_0_25px_rgba(255,255,255,0.2)] transition-shadow">
+
+
       <CardHeader>
         <CardTitle className="text-lg">{title}</CardTitle>
       </CardHeader>
