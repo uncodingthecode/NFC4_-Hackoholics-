@@ -24,7 +24,7 @@ export const getEmergencyInfo = async (req, res) => {
       emergencyContacts: family?.emergency_contacts || []
     };
 
-    return res.status(200).json(emergencyInfo);
+    return res.status(200).json(family);
   } catch (error) {
     console.error(error);
     return res.status(500).json({ error: error.message });
