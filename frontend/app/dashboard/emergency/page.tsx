@@ -7,10 +7,12 @@ import { useHealthcare } from "@/context/healthcare-context"
 import { Plus, Phone, Share, Shield, AlertTriangle, User } from "lucide-react"
 import { AddEmergencyContactModal } from "@/components/modals/add-emergency-contact-modal"
 import { EmergencyContactCard } from "@/components/EmergencyContactCard"
+import { useToast } from "@/hooks/use-toast"
 
 export default function EmergencyPage() {
-  const { family, user } = useHealthcare()
+  const { family, user, updateEmergencyContacts } = useHealthcare()
   const [showAddModal, setShowAddModal] = useState(false)
+  const { toast } = useToast()
 
   const handleEmergencyCall = (phone: string) => {
     if (typeof window !== "undefined") {
@@ -21,6 +23,27 @@ export default function EmergencyPage() {
   const handleShareSummary = () => {
     // Mock implementation for sharing health summary
     console.log("Sharing health summary...")
+  }
+
+  const handleDeleteContact = async (contactIndex: number) => {
+    try {
+      const currentContacts = family?.emergency_contacts || []
+      const updatedContacts = currentContacts.filter((_, index) => index !== contactIndex)
+      
+      await updateEmergencyContacts(updatedContacts)
+      
+      toast({
+        title: "Contact removed",
+        description: "Emergency contact has been removed successfully.",
+      })
+    } catch (error) {
+      console.error('Error removing emergency contact:', error)
+      toast({
+        title: "Error",
+        description: "Failed to remove emergency contact. Please try again.",
+        variant: "destructive",
+      })
+    }
   }
 
   return (
@@ -137,7 +160,11 @@ export default function EmergencyPage() {
           {family?.emergency_contacts && family.emergency_contacts.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {family.emergency_contacts.map((contact, index) => (
-                <EmergencyContactCard key={index} contact={contact} />
+                <EmergencyContactCard 
+                  key={index} 
+                  contact={contact} 
+                  onDelete={() => handleDeleteContact(index)}
+                />
               ))}
             </div>
           ) : (

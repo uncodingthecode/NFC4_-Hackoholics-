@@ -16,6 +16,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useToast } from "@/hooks/use-toast"
+import { useHealthcare } from "@/context/healthcare-context"
 
 interface AddEmergencyContactModalProps {
   open: boolean
@@ -30,14 +31,21 @@ export function AddEmergencyContactModal({ open, onOpenChange }: AddEmergencyCon
   })
   const [isLoading, setIsLoading] = useState(false)
   const { toast } = useToast()
+  const { family, updateEmergencyContacts } = useHealthcare()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
 
     try {
-      // Mock implementation - in real app, this would call an API
-      await new Promise((resolve) => setTimeout(resolve, 1000))
+      // Get current emergency contacts
+      const currentContacts = family?.emergency_contacts || []
+      
+      // Add new contact to the list
+      const updatedContacts = [...currentContacts, formData]
+      
+      // Update emergency contacts via API
+      await updateEmergencyContacts(updatedContacts)
 
       toast({
         title: "Emergency contact added",
@@ -52,6 +60,7 @@ export function AddEmergencyContactModal({ open, onOpenChange }: AddEmergencyCon
       })
       onOpenChange(false)
     } catch (error) {
+      console.error('Error adding emergency contact:', error)
       toast({
         title: "Error",
         description: "Failed to add emergency contact. Please try again.",

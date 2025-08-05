@@ -53,7 +53,7 @@ app.use('/api/v1/agent', agentRoutes);
 app.use('/api/v1/gemini', geminiRouter);
 app.use('/api/v1/profile', profileRouter);
 
-app.use('/api/chat', chatRoute);
+app.use('/api/v1/chat', chatRoute);
 
 // Error Handler Middleware (should be last)
 app.use(errorHandler);

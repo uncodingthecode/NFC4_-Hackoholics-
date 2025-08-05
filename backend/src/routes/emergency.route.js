@@ -2,6 +2,7 @@ import express from "express";
 import {
   getEmergencyInfo,
   shareEmergencyInfo,
+  generateHealthReportSummary,
 } from "../controllers/emergency.controller.js";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
 
@@ -21,5 +22,11 @@ router.get("/", getEmergencyInfo);
  * @desc Share emergency info via email with specified contact
  */
 router.post("/share/:contactId", shareEmergencyInfo);
+
+/**
+ * @route POST /api/emergency/generate-summary
+ * @desc Generate AI summary for health reports
+ */
+router.post("/generate-summary", generateHealthReportSummary);
 
 export default router;

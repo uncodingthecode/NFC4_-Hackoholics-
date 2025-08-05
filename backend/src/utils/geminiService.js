@@ -75,7 +75,7 @@ export const chatWithGemini = async (userMessage, context = "") => {
 // Health-specific chatbot
 export const healthChatbot = async (userMessage, userContext = {}) => {
   try {
-    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
     const context = `
     User Profile:
@@ -93,11 +93,20 @@ export const healthChatbot = async (userMessage, userContext = {}) => {
     
     IMPORTANT: Always include medical disclaimers and recommend consulting healthcare professionals for serious concerns.
     
+    FORMATTING REQUIREMENTS:
+    - Use proper indentation for lists and sections
+    - Use **bold text** for important points, symptoms, and warnings
+    - Use bullet points (*) for lists of symptoms, causes, or recommendations
+    - Use numbered lists (1., 2., 3.) for step-by-step instructions
+    - Add line breaks between different sections
+    - Use clear headings with **bold** formatting
+    - Structure your response with proper spacing and organization
+    
     ${context}
     
     User Question: ${userMessage}
     
-    Provide a helpful, personalized response while being mindful of the user's health context.
+    Provide a helpful, personalized response with proper formatting, indentation, and clear structure while being mindful of the user's health context.
     `;
 
     const result = await model.generateContent(prompt);

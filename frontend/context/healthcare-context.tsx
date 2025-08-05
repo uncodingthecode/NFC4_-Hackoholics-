@@ -118,12 +118,20 @@ interface HealthcareContextType {
   getProfile: () => Promise<void>
   addFamilyDoctor: (email: string) => Promise<void>
   getFamily: () => Promise<void>
+  updateEmergencyContacts: (contacts: Array<{ name: string; relation: string; phone: string }>) => Promise<void>
   getMedications: () => Promise<void>
   getVitals: () => Promise<void>
   getNotifications: () => Promise<void>
   getPrescriptions: () => Promise<void>
   uploadPrescription: (formData: FormData) => Promise<Prescription>
   processPrescriptionWithGemini: (prescriptionId: string) => Promise<void>
+  sendChatMessage: (message: string) => Promise<string>
+  generateHealthReportSummary: (data: {
+    vitals: any[]
+    medications: any[]
+    profile: any
+    healthScoreData: any[]
+  }) => Promise<string>
   addMedication: (medicationData: Partial<Medication>) => void
   addVital: (vitalData: Partial<Vital>) => void
   addAppointment: (appointmentData: Partial<Appointment>) => void
@@ -365,6 +373,21 @@ export function HealthcareProvider({ children }: { children: React.ReactNode }) 
     }
   };
 
+  const updateEmergencyContacts = async (contacts: Array<{ name: string; relation: string; phone: string }>) => {
+    try {
+      const response = await apiClient.updateEmergencyContacts(contacts);
+      if (response.success) {
+        // Update the family state with new emergency contacts
+        setFamily(prev => prev ? { ...prev, emergency_contacts: contacts } : null);
+      } else {
+        throw new Error(response.error || 'Failed to update emergency contacts');
+      }
+    } catch (error) {
+      console.error('Error updating emergency contacts:', error);
+      throw error;
+    }
+  };
+
   const getMedications = async () => {
     try {
       const response = await apiClient.getMedications();
@@ -497,6 +520,39 @@ export function HealthcareProvider({ children }: { children: React.ReactNode }) 
     }
   };
 
+  const sendChatMessage = async (message: string): Promise<string> => {
+    try {
+      const response = await apiClient.sendChatMessage(message);
+      if (response.success) {
+        return response.data.reply;
+      } else {
+        throw new Error(response.error || 'Failed to send chat message');
+      }
+    } catch (error) {
+      console.error('Error sending chat message:', error);
+      throw error;
+    }
+  };
+
+  const generateHealthReportSummary = async (data: {
+    vitals: any[]
+    medications: any[]
+    profile: any
+    healthScoreData: any[]
+  }): Promise<string> => {
+    try {
+      const response = await apiClient.generateHealthReportSummary(data);
+      if (response.success) {
+        return response.data.summary;
+      } else {
+        throw new Error(response.error || 'Failed to generate health report summary');
+      }
+    } catch (error) {
+      console.error('Error generating health report summary:', error);
+      throw error;
+    }
+  };
+
   const addMedication = (medicationData: Partial<Medication>) => {
     const newMedication: Medication = {
       _id: `med${Date.now()}`,
@@ -569,12 +625,15 @@ export function HealthcareProvider({ children }: { children: React.ReactNode }) 
         getProfile,
         addFamilyDoctor,
         getFamily,
+        updateEmergencyContacts,
         getMedications,
         getVitals,
         getNotifications,
         getPrescriptions,
         uploadPrescription,
         processPrescriptionWithGemini,
+        sendChatMessage,
+        generateHealthReportSummary,
         addMedication,
         addVital,
         addAppointment,

@@ -166,6 +166,17 @@ class ApiClient {
     return this.request('/families')
   }
 
+  async updateEmergencyContacts(contacts: Array<{
+    name: string
+    relation: string
+    phone: string
+  }>) {
+    return this.request('/families/emergency-contacts', {
+      method: 'PUT',
+      body: JSON.stringify({ contacts }),
+    })
+  }
+
   // Medication methods
   async getMedications() {
     return this.request('/medications')
@@ -199,6 +210,26 @@ class ApiClient {
   async processPrescriptionWithGemini(prescriptionId: string) {
     return this.request(`/prescriptions/${prescriptionId}/process-gemini`, {
       method: 'POST',
+    })
+  }
+
+  // Chat methods
+  async sendChatMessage(message: string) {
+    return this.request('/chat', {
+      method: 'POST',
+      body: JSON.stringify({ message }),
+    })
+  }
+
+  async generateHealthReportSummary(data: {
+    vitals: any[]
+    medications: any[]
+    profile: any
+    healthScoreData: any[]
+  }) {
+    return this.request('/emergency/generate-summary', {
+      method: 'POST',
+      body: JSON.stringify(data),
     })
   }
 }
