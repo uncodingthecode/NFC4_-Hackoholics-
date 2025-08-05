@@ -43,48 +43,33 @@ export const shareEmergencyInfo = async (req, res) => {
       Medication.find({ user_id: req.user._id })
     ]);
 
-    const emergencyInfo = {
-      name: req.user.name,
-      bloodGroup: profile?.blood_group || 'Not Provided',
-      allergies: profile?.allergies || [],
-      conditions: profile?.existing_conditions || [],
-      medications: medications.map(m => ({
-        name: m.medicine_name,
-        dosage: m.dosage
-      })),
-      emergencyContacts: family?.emergency_contacts || []
-    };
-
-    // Find contact by ID and extract email
-    const contact = family?.emergency_contacts.find(c => c._id.toString() === contactId);
-    const contactEmail = contact?.email || process.env.DEFAULT_EMERGENCY_EMAIL;
-
-    if (!contactEmail) {
-      return res.status(400).json({ error: "Emergency contact email not found" });
+    if (!family || family.emergency_contacts.length === 0) {
+      console.warn("❌ No emergency contacts found for family:", family);
+      return res.status(400).json({ error: "No emergency contact email available." });
     }
 
-    const emailText = `
-Emergency Information for ${emergencyInfo.name}:
+    const emergencyEmail = family.emergency_contacts[0]?.email; // Get first contact's email
+    if (!emergencyEmail) {
+      console.warn("❌ Emergency contact missing email field:", family.emergency_contacts[0]);
+      return res.status(400).json({ error: "Emergency contact email missing." });
+    }
 
-Blood Group: ${emergencyInfo.bloodGroup}
-Allergies: ${emergencyInfo.allergies.join(', ') || 'None'}
-Existing Conditions: ${emergencyInfo.conditions.join(', ') || 'None'}
-Medications:
-${emergencyInfo.medications.map(m => `- ${m.name} (${m.dosage})`).join('\n')}
+    const subject = `🚨 Emergency Alert: ${profile.name}'s Health Status`;
+    const text = `
+    Patient Name: ${profile.name}
+    BP: ${profile.bp_systolic}/${profile.bp_diastolic}
+    Temperature: ${profile.temperature}
+    Sugar Level: ${profile.sugar}
+    Medications: ${medications.map(m => m.name).join(", ") || "None"}
 
-Emergency Contacts:
-${emergencyInfo.emergencyContacts.map(c => `${c.name} - ${c.phone}`).join('\n')}
-`;
+    Please check on the patient immediately.
+    `;
 
-    await sendEmergencyEmail(contactEmail, "Emergency Medical Info", emailText);
-
-    return res.status(200).json({
-      message: "Emergency info emailed successfully",
-      sharedWith: contactEmail
-    });
+    await sendEmergencyEmail(emergencyEmail, subject, text);
+    return res.status(200).json({ success: true });
 
   } catch (error) {
-    console.error(error);
+    console.error("❌ shareEmergencyInfo error:", error);
     return res.status(500).json({ error: error.message });
   }
 };
