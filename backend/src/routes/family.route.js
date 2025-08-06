@@ -6,7 +6,8 @@ import {
   updateEmergencyContacts,
   addEmergencyContact,
   updateEmergencyContact,
-  deleteEmergencyContact
+  deleteEmergencyContact,
+  getFamilyMembers
 } from "../controllers/family.controller.js";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
 
@@ -21,7 +22,8 @@ router.route("/")
 
 // Family member management
 router.route("/members")
-  .post(addFamilyMember); // POST /api/v1/families/members
+  .post(addFamilyMember) // POST /api/v1/families/members
+  .get(getFamilyMembers); // GET /api/v1/families/members
 
 // Emergency contacts
 router.route("/emergency-contacts")

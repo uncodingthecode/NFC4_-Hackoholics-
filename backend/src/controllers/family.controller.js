@@ -210,3 +210,34 @@ export const deleteEmergencyContact = async (req, res) => {
     return res.status(500).json({ error: error.message });
   }
 };
+
+// GET /api/v1/families/members
+export const getFamilyMembers = async (req, res) => {
+  try {
+    const family = await Family.findById(req.user.family_id);
+    if (!family) {
+      return res.status(404).json({ error: "Family not found" });
+    }
+
+    // Get detailed information for each family member
+    const memberDetails = await Promise.all(
+      family.members.map(async (memberId) => {
+        const user = await User.findById(memberId).select('name email role relation createdAt');
+        return user;
+      })
+    );
+
+    // Filter out any null values (in case a member was deleted)
+    const validMembers = memberDetails.filter(member => member !== null);
+
+    return res.status(200).json({
+      success: true,
+      data: {
+        familyName: family.name,
+        members: validMembers
+      }
+    });
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+};

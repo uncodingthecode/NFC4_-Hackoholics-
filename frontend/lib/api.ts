@@ -206,17 +206,10 @@ class ApiClient {
     profile: any
     healthScoreData: any[]
   }) {
-    const response = await this.request('/emergency/generate-summary', {
+    return this.request('/emergency/generate-summary', {
       method: 'POST',
       body: JSON.stringify(data),
-    });
-    
-    // Handle the response explicitly
-    if (!response.success) {
-      console.error('Failed to generate health report:', response.error);
-      throw new Error(response.error || 'Failed to generate health report');
-    }
-    return response;
+    })
   }
 }
 
