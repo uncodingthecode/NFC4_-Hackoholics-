@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
+import { useHealthcare } from "@/context/healthcare-context"
 import {
   Dialog,
   DialogContent,
@@ -41,13 +42,21 @@ export function AddEmergencyContactModal({ open, onOpenChange }: AddEmergencyCon
     setIsLoading(true)
 
     try {
-      await familyAPI.addEmergencyContact(formData) // ✅ call real backend
+      // Get current emergency contacts
+      const currentContacts = family?.emergency_contacts || []
+      
+      // Add new contact to the list
+      const updatedContacts = [...currentContacts, formData]
+      
+      // Update emergency contacts through context
+      await updateEmergencyContacts(updatedContacts)
+      
       toast({
         title: "Emergency contact added",
         description: `${formData.name} was added to your emergency contacts.`,
       })
 
-      // Reset
+      // Reset form and close modal
       setFormData({ name: "", relation: "", email: "", phone: "" })
       onOpenChange(false)
     } catch (error) {

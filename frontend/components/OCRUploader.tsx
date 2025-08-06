@@ -2,6 +2,8 @@
 
 import type React from "react"
 import { useState, useCallback } from "react"
+import { useHealthcare } from "@/context/healthcare-context"
+import { useToast } from "@/hooks/use-toast"
 import {
   Card,
   CardContent,
@@ -85,7 +87,7 @@ export function OCRUploader({ onClose, onUploadComplete }: OCRUploaderProps) {
 
     try {
       const formData = new FormData()
-      formData.append("prescription", selectedFile)
+      formData.append("image", selectedFile)
 
       const token = localStorage.getItem("accessToken") || ""
 

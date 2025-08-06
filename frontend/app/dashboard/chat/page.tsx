@@ -205,46 +205,6 @@ export default function ChatPage() {
           </p>
         </div>
       </Card>
-
-      {/* Quick Actions */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card className="shadow-[0_0_15px_rgba(255,255,255,0.1)] hover:shadow-[0_0_25px_rgba(255,255,255,0.2)] transition-shadow">
-
-
-          <CardContent className="p-4">
-            <h3 className="font-medium mb-2">Upload Report</h3>
-            <p className="text-sm text-muted-foreground mb-3">Share lab results or medical reports</p>
-            <Button variant="outline" size="sm" className="w-full bg-transparent">
-              <Paperclip className="mr-2 h-3 w-3" />
-              Upload File
-            </Button>
-          </CardContent>
-        </Card>
-
-        <Card className="shadow-[0_0_15px_rgba(255,255,255,0.1)] hover:shadow-[0_0_25px_rgba(255,255,255,0.2)] transition-shadow">
-
-
-          <CardContent className="p-4">
-            <h3 className="font-medium mb-2">Schedule Appointment</h3>
-            <p className="text-sm text-muted-foreground mb-3">Book a consultation with your doctor</p>
-            <Button variant="outline" size="sm" className="w-full bg-transparent">
-              Schedule Now
-            </Button>
-          </CardContent>
-        </Card>
-
-        <Card className="shadow-[0_0_15px_rgba(255,255,255,0.1)] hover:shadow-[0_0_25px_rgba(255,255,255,0.2)] transition-shadow">
-
-
-          <CardContent className="p-4">
-            <h3 className="font-medium mb-2">Emergency Contact</h3>
-            <p className="text-sm text-muted-foreground mb-3">Quick access to emergency services</p>
-            <Button variant="destructive" size="sm" className="w-full">
-              Emergency Call
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
     </div>
   )
 }

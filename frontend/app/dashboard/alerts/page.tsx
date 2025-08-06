@@ -103,10 +103,10 @@ export default function AlertsPage() {
                       <div className="mt-1">{getSeverityIcon(alert.severity)}</div>
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-2">
-                          <Badge variant={getSeverityColor(alert.severity) as any}>
-                            {alert.severity.toUpperCase()}
+                          <Badge variant={getSeverityColor(alert.severity || 'low') as any}>
+                            {(alert.severity || 'low').toUpperCase()}
                           </Badge>
-                          <Badge variant="outline">{alert.type.replace("_", " ").toUpperCase()}</Badge>
+                          <Badge variant="outline">{(alert.type || 'notification').replace("_", " ").toUpperCase()}</Badge>
                         </div>
                         <p className="font-medium text-foreground mb-1">{alert.message}</p>
                         <p className="text-sm text-muted-foreground">
@@ -140,8 +140,8 @@ export default function AlertsPage() {
                     </div>
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-2">
-                        <Badge variant="secondary">{alert.severity.toUpperCase()}</Badge>
-                        <Badge variant="outline">{alert.type.replace("_", " ").toUpperCase()}</Badge>
+                        <Badge variant="secondary">{(alert.severity || 'low').toUpperCase()}</Badge>
+                        <Badge variant="outline">{(alert.type || 'notification').replace("_", " ").toUpperCase()}</Badge>
                         <Badge variant="outline" className="text-green-600">
                           ACKNOWLEDGED
                         </Badge>
